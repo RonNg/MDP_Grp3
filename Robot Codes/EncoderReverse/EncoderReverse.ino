@@ -1,5 +1,4 @@
 #include <EnableInterrupt.h>
-#include <Encoder.h>
 #include "DualVNH5019MotorShield.h"
 
 
@@ -105,6 +104,7 @@ void computePID(double consKp,double consKi, double consKd, char  direction)
     break;
 
     case'r':
+    break;
     
   }
   

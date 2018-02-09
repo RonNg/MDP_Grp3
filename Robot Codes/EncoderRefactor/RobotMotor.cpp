@@ -7,6 +7,11 @@
 #define MOTOR_LEFT 1
 #define MOTOR_RIGHT 2
 
+#define PRATIO_LEFT 3.17383
+#define PRATIO_RIGHT 3.23021
+
+#define INITIAL_POW 220
+
 void RobotMotor::begin()
 {
 	m1Ticks = 0;
@@ -18,8 +23,8 @@ void RobotMotor::begin()
 	m1TargetCounter = 0;
 	m2TargetCounter = 0;
 
-	m1Power = 0;
-	m2Power = 0;
+	m1Power = 160;
+	m2Power = 170;
 
 	lastTime = 0;
 
@@ -33,7 +38,7 @@ void RobotMotor::CalcTicks()
 {
 	if ((millis() - lastTime) >= TICK_REFRESH_INTERVAL)
 	{
-		
+
 
 		m1RPM = ((m1Ticks*(60000 / TICK_REFRESH_INTERVAL)) / TICKS_PER_REV); //Extrapolate RPM
 		m2RPM = ((m2Ticks*(60000 / TICK_REFRESH_INTERVAL)) / TICKS_PER_REV); //100ms * 600ms = 1 minute (interpolate RPM)
@@ -42,32 +47,47 @@ void RobotMotor::CalcTicks()
 
 
 		Serial.print(m1RPM);
-
-		Serial.print(", : ");
+		Serial.print(" : ");
 		Serial.print(m2RPM);
 		Serial.println();
+
+		Serial.println ("=== Power ===");
+		Serial.print(m1Power);
+		Serial.print(", ");
+		Serial.print(m2Power);
+		Serial.println();
+		Serial.println("===========");
 
 
 		lastTime = millis();
 	}
+
+
+
+
 }
 
 double RobotMotor::ComputePID(double consKp, double consKi, double consKd, char direction, double targetRPM, int motorNo)
 {
+		
 	int currentRPM;
+	int ratio = 0;
 
 	if (motorNo == MOTOR_LEFT)
+	{
+		//Serial.println("Motor left");
+		ratio = PRATIO_LEFT;
 		currentRPM = m1RPM;
-	else
+	}
+	else if (motorNo == MOTOR_RIGHT)
+	{
 		currentRPM = m2RPM;
-
-	//Convert RPM into power before computing PID
+		ratio = PRATIO_RIGHT;
+		//Serial.println("Motor right");
+	}
 
 	//Setpoint - Input(Target Tick)
 	double error = targetRPM - currentRPM;
-
-	
-
 
 	//Integral
 	errSum += error;
@@ -77,6 +97,29 @@ double RobotMotor::ComputePID(double consKp, double consKi, double consKd, char 
 	lastErr = error;
 
 	return ((consKp * error) + (consKi * errSum) + (consKd * dErr));
+}
+
+bool runOnce = false;
+void RobotMotor::ForwardCalibration(int rpm)
+{
+	/*if (!runOnce)
+	{
+		md.setSpeeds(280, 280);
+		runOnce = true;
+		delay(1500);
+			
+	}*/
+
+	m1Power += ComputePID(0.0002, 0, 0.00005, 'f', rpm, MOTOR_LEFT);
+	m2Power += ComputePID(0.0002, 0, 0.00005, 'f', rpm, MOTOR_RIGHT);
+
+	if (m1Power < 0)
+		m1Power = 0;
+
+	if (m2Power < 0)
+		m2Power = 0;
+
+	md.setSpeeds(m1Power, m2Power);
 }
 
 void RobotMotor::Forward(double cm)
@@ -102,12 +145,12 @@ void RobotMotor::Forward(double cm)
 		Serial.println();
 
 		m1Power += ComputePID(0.0025, 0, 0.0005, 'f', 40, MOTOR_LEFT);
-		m1Power += ComputePID(0.008, 0, 0.0005, 'f', 40, MOTOR_RIGHT);
+		m2Power += ComputePID(0.008, 0, 0.0005, 'f', 40, MOTOR_RIGHT);
 
-		if (m1Power <= 0)
+		if (m1Power < 0)
 			m1Power = 0;
 
-		if (m2Power<= 0)
+		if (m2Power < 0)
 			m2Power = 0;
 
 		md.setSpeeds(m1Power, m2Power);

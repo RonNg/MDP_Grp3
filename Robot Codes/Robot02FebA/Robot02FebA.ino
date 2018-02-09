@@ -1,5 +1,4 @@
 #include <EnableInterrupt.h>
-#include <Encoder.h>
 #include "DualVNH5019MotorShield.h"
 
 DualVNH5019MotorShield md;
@@ -159,7 +158,8 @@ void loop()
   //To update RPM for use by PID
   calcTicks (TICK_REFRESH_INTERVAL);
 
-  
+
+  /*
   char input = 'f';
   switch(input)
   {
@@ -171,7 +171,9 @@ void loop()
     case 'r':
        break;
   }
-  
+  */
+
+  TestStraight();
 
 
 }

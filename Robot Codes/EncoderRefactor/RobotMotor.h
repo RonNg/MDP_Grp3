@@ -5,14 +5,14 @@ class RobotMotor
 {
 private:
 
-	double m1Ticks;
-	double m2Ticks;
+	volatile double m1Ticks;
+	volatile double m2Ticks;
+
+	volatile double m1TargetCounter; //For counting to target ticks bnased on distance
+	volatile double m2TargetCounter;
 
 	double m1RPM;
 	double m2RPM;
-
-	double m1TargetCounter; //For counting to target ticks bnased on distance
-	double m2TargetCounter;
 
 	double m1Power;
 	double m2Power;
@@ -40,6 +40,8 @@ public:
 
 	void begin();
 	void CalcTicks();
+
+	void ForwardCalibration(int rpm);
 	void Forward(double cm);	
 	void Turn();
 
