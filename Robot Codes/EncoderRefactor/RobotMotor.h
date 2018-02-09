@@ -30,18 +30,17 @@ public:
 	inline void M1Change() { m1Ticks++; m1TargetCounter++; }
 	inline void M2Change() { m2Ticks++; m2TargetCounter++; }
 	inline void ResetPID() { errSum = 0; lastErr = 0; }
-
+	
+	inline DualVNH5019MotorShield GetMotor() {	return md; }
 	
 	//Char dir is for forward and backward
 	//motorNo 1 for Left Motor, 2 for Right Motor
 	//
 	double ComputePID(double consKp, double consKi, double consKd, char direction, double targetRPM, int motorNo);
 
-
 	void begin();
 	void CalcTicks();
-	void Forward(double cm);
-	
+	void Forward(double cm);	
 	void Turn();
 
 };
