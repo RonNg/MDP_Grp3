@@ -38,33 +38,18 @@ void RobotMotor::CalcTicks()
 {
 	if ((millis() - lastTime) >= TICK_REFRESH_INTERVAL)
 	{
-
-
 		m1RPM = ((m1Ticks*(60000 / TICK_REFRESH_INTERVAL)) / TICKS_PER_REV); //Extrapolate RPM
 		m2RPM = ((m2Ticks*(60000 / TICK_REFRESH_INTERVAL)) / TICKS_PER_REV); //100ms * 600ms = 1 minute (interpolate RPM)
 		m1Ticks = 0;
 		m2Ticks = 0;
-
 
 		Serial.print(m1RPM);
 		Serial.print(" : ");
 		Serial.print(m2RPM);
 		Serial.println();
 
-		Serial.println ("=== Power ===");
-		Serial.print(m1Power);
-		Serial.print(", ");
-		Serial.print(m2Power);
-		Serial.println();
-		Serial.println("===========");
-
-
 		lastTime = millis();
 	}
-
-
-
-
 }
 
 double RobotMotor::ComputePID(double consKp, double consKi, double consKd, char direction, double targetRPM, int motorNo)
@@ -124,7 +109,6 @@ void RobotMotor::ForwardCalibration(int rpm)
 
 void RobotMotor::Forward(double cm)
 {
-
 	int targetTick = cm * TICKS_PER_CM;
 	m1TargetCounter = m2TargetCounter = 0;
 
@@ -159,10 +143,10 @@ void RobotMotor::Forward(double cm)
 	md.setBrakes(400, 400);
 }
 
-void RobotMotor::Turn()
+void RobotMotor::Turn(double angle)
 {
 	//Diameter of wheel to wheel is 17cm
-	//For a 90 deg turn, both wheels must turn the robot 45 degs in each direction
+	//For a 90 deg turn, both wheels must turn the robot 90 degs in each direction
 	//By using the formula Pi * 17 * 45/360 
 	//We can find that the distance each wheel must travel is 6.67cm
 
@@ -182,8 +166,8 @@ void RobotMotor::Turn()
 		Serial.print(m2RPM);
 		Serial.println();
 
-		m1Power += ComputePID(0.0020, 0, 0.0005, 'f', 40, true);
-		m2Power += ComputePID(0.0025, 0, 0.0005, 'f', 40, false);
+		m1Power += ComputePID(0.0002, 0, 0.00005, 'f', 40, true);
+		m2Power += ComputePID(0.0002, 0, 0.00005, 'f', 40, false);
 
 		if (m1Power <= 0)
 			m1Power = 0;
