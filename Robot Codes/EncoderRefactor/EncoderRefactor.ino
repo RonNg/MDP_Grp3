@@ -5,9 +5,11 @@
 #include "RobotMotor.h"
 #include "RobotSensor.h"
 
+#include <math.h>
 
 
 RobotMotor motor;
+#define DIST_BETWEEN_FRONT_SENSOR 10 //distance (lens to lens) of IR_FL and IR_FR
 
 /*==
 2YK Sensors range 20-150cm (Big sensor)
@@ -51,22 +53,83 @@ void CalibrationRPM()
 	motor.ForwardCalibration(80);
 }
 
-void Calibrate_Grid(int setPoint)
+//Makes both sensors aligned with each other i.e. have both sensors measure same distance from the front
+void Calibrate_SensorAngle(int setPoint)
 {
-	int calibratePower = 200;
+	double leftSensor;
+	double rightSensor;
+	for (int i = 0; i < 6; i++)
+	{
+		
+		//Align both sensors forward first, regardless whether its far or near
+		leftSensor = ir_FL.getDistance(); 
+		rightSensor = ir_FR.getDistance();
+
+		double sensorDiff = abs(leftSensor - rightSensor);
+
+		if (sensorDiff <= 0.2)
+			break;
+
+		//if (sensorDiff == 0) //Aligned
+		//	break;
+
+		//Atan returns radian. Convert rad to deg by multiplying 180/PI
+		double angle = atan(sensorDiff / 15.0) * 180 / PI;
+		
+		Serial.print(leftSensor);
+		Serial.print(", ");
+		Serial.print(rightSensor);
+		Serial.print(" Sensor Diff: ");
+		Serial.print(sensorDiff);
+
+
+		Serial.print("  Angle: ");
+		Serial.println(angle);
+
+		//Left is further
+		if (leftSensor > rightSensor)
+		{
+			//Turn right
+			Serial.print("   Turn Right");
+			motor.Turn(angle);
+
+		}
+		else //Right is further
+		{
+			//Turn left
+			Serial.print("   Turn Left");
+			motor.Turn(-angle);
+		}
+	}
+
+
+	//Assume that both sensors are aligned
+	//Move forward to make one sensor read 10cm
+	Calibrate_Forward(setPoint);
+
+}
+//Move forward until one sensor reads setPoint distance
+void Calibrate_Forward(int setPoint) 
+{
 	while (1)
 	{
-		double diff = abs(ir_FL.getDistance() - ir_FR.getDistance());
-		
-		if (diff == 0)
+		double leftSensor = ir_FL.getDistance();
+
+		//Distance between robot and setpoint
+		//If negative, it means that the robot is too near from the setpoint
+		//If positive, it means that the robot is too far from the setpoint
+		double distance = leftSensor - setPoint;
+
+		if (distance > 0) //Robot away from setpoint
 		{
-			motor.GetMotor().setBrakes(400, 400);
+			motor.Forward(1, false);
+		}
+		else if (distance < 0) //Robot too 
+		{
+			motor.Forward(1, true);
+		}
+		else
 			break;
-		}
-		
-		if (ir_FL.getDistance() > ir_FR.getDistance()) //Left more front than right
-		{
-		}
 	}
 }
 
@@ -81,17 +144,21 @@ void setup()
 	enableInterrupt(M2B, m2Change, CHANGE);
 
 	motor.begin();
-	//sensor.begin();
 
+	Calibrate_SensorAngle(10);
+	
 	/*for (int i = 0; i < 4; ++i)
 	{
-	motor.GetMotor().setSpeeds(i*70, i * 70);
-	delay(1);
+		if (i % 2)
+		{
+			motor.Turn(-10);
+		}
+		else
+			motor.Turn(10);
+		
+		delay(1000);
+
 	}*/
-
-	//Calibrate_Grid(10);
-
-	motor.Forward(10);
 }
 
 int prevTime = 0;
@@ -113,5 +180,6 @@ void loop()
 
 	//	prevTime = millis();
 	//}
+
 }
 

@@ -1,6 +1,19 @@
 #pragma once
 #include <DualVNH5019MotorShield.h>
 
+#define TICK_REFRESH_INTERVAL 1000 //ms
+#define TICKS_PER_CM 118
+#define TICKS_PER_REV 2248.86
+
+#define MOTOR_LEFT 1
+#define MOTOR_RIGHT 2
+
+#define PRATIO_LEFT 3.17383
+#define PRATIO_RIGHT 3.23021
+
+
+#define INITIAL_POW 220
+
 class RobotMotor
 {
 private:
@@ -42,8 +55,8 @@ public:
 	void CalcTicks();
 
 	void ForwardCalibration(int rpm);
-	void Forward(double cm);	
-	void Turn();
+	void Forward(double cm, bool reverse);	
+	void Turn(double angle);
 
 };
 

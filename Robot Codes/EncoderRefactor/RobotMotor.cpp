@@ -1,16 +1,5 @@
 #include "RobotMotor.h"
 
-#define TICK_REFRESH_INTERVAL 1000 //ms
-#define TICKS_PER_CM 119 
-#define TICKS_PER_REV 2248.86
-
-#define MOTOR_LEFT 1
-#define MOTOR_RIGHT 2
-
-#define PRATIO_LEFT 3.17383
-#define PRATIO_RIGHT 3.23021
-
-#define INITIAL_POW 220
 
 void RobotMotor::begin()
 {
@@ -84,7 +73,6 @@ double RobotMotor::ComputePID(double consKp, double consKi, double consKd, char 
 	return ((consKp * error) + (consKi * errSum) + (consKd * dErr));
 }
 
-bool runOnce = false;
 void RobotMotor::ForwardCalibration(int rpm)
 {
 	/*if (!runOnce)
@@ -107,7 +95,7 @@ void RobotMotor::ForwardCalibration(int rpm)
 	md.setSpeeds(m1Power, m2Power);
 }
 
-void RobotMotor::Forward(double cm)
+void RobotMotor::Forward(double cm, bool reverse)
 {
 	int targetTick = cm * TICKS_PER_CM;
 	m1TargetCounter = m2TargetCounter = 0;
@@ -117,7 +105,7 @@ void RobotMotor::Forward(double cm)
 	m1Power = 200;
 	m2Power = 200;
 
-	while (m1TargetCounter < targetTick || m2TargetCounter < targetTick)
+	while (m1TargetCounter < targetTick  || m2TargetCounter < targetTick)
 	{
 		CalcTicks();
 
@@ -128,8 +116,8 @@ void RobotMotor::Forward(double cm)
 		Serial.print(m2RPM);
 		Serial.println();
 
-		m1Power += ComputePID(0.0025, 0, 0.0005, 'f', 40, MOTOR_LEFT);
-		m2Power += ComputePID(0.008, 0, 0.0005, 'f', 40, MOTOR_RIGHT);
+		m1Power += ComputePID(0.0025, 0, 0.0005, 'f', 100, MOTOR_LEFT);
+		m2Power += ComputePID(0.008, 0, 0.0005, 'f', 100, MOTOR_RIGHT);
 
 		if (m1Power < 0)
 			m1Power = 0;
@@ -137,51 +125,61 @@ void RobotMotor::Forward(double cm)
 		if (m2Power < 0)
 			m2Power = 0;
 
-		md.setSpeeds(m1Power, m2Power);
+		if(!reverse)
+			md.setSpeeds(m1Power, m2Power);
+		else
+			md.setSpeeds(-m1Power, -m2Power);
 	}
 
 	md.setBrakes(400, 400);
 }
 
+
 void RobotMotor::Turn(double angle)
 {
-	//Diameter of wheel to wheel is 17cm
+	//Wheel to wheel is 17cm i.e. Diameter
+	//Pi * d * TurnAngle/360 = Distant to travel for wheel (Formula for length of arc)
+	//1cm = 119 ticks
+
 	//For a 90 deg turn, both wheels must turn the robot 90 degs in each direction
 	//By using the formula Pi * 17 * 45/360 
 	//We can find that the distance each wheel must travel is 6.67cm
 
+
 	//Turn 90 deg
 	//int targetTick = 6.67 * TICKS_PER_CM;
-	int targetTick = 13 * TICKS_PER_CM;
+
+	//Convert angle to cm
+
+	float distance = PI * 17.0 * abs(angle) / 360.0;
+
+	int targetTick = distance * TICKS_PER_CM;
 	m1TargetCounter = m2TargetCounter = 0;
 
-	while (m1TargetCounter < targetTick - 90 || m2TargetCounter < targetTick)
+	while (m1TargetCounter < targetTick - 120 || m2TargetCounter < targetTick - 120)
 	{
 		CalcTicks();
+		  
+		//Serial.print("Left RPM: ");
+		//Serial.print(m1RPM);
 
-		Serial.print("Left RPM: ");
-		Serial.print(m1RPM);
+		//Serial.print(", Right RPM: ");
+		//Serial.print(m2RPM);
+		//Serial.println();
 
-		Serial.print(", Right RPM: ");
-		Serial.print(m2RPM);
-		Serial.println();
+		m1Power += ComputePID(0.0025, 0, 0.0005, 'f', 40, MOTOR_LEFT);
+		m2Power += ComputePID(0.0025, 0, 0.0005, 'f', 40, MOTOR_RIGHT);
 
-		m1Power += ComputePID(0.0002, 0, 0.00005, 'f', 40, true);
-		m2Power += ComputePID(0.0002, 0, 0.00005, 'f', 40, false);
-
-		if (m1Power <= 0)
-			m1Power = 0;
-
-		//Right turn the right motor must go backwards
-		if (m2Power <= 0)
-			m2Power = 0;
-
-		md.setSpeeds(m1Power, -m2Power);
+		
+		if (angle > 0) //Positive angle indicates clockwise
+			md.setSpeeds(m1Power, -m2Power);
+		else
+			md.setSpeeds(-m1Power, m2Power);
 	}
 
 	Serial.print(m1Power);
 	Serial.print(", ");
 	Serial.print(m2Power);
 
-	md.setBrakes(400, 370);
+	md.setBrakes(400, 400);
 }
