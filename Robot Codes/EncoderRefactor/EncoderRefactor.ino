@@ -50,7 +50,7 @@ void RPMBenchtest()
 
 void CalibrationRPM()
 {
-	motor.ForwardCalibration(80);
+	motor.CalibrationForward(80);
 }
 
 //Makes both sensors aligned with each other i.e. have both sensors measure same distance from the front
@@ -58,7 +58,7 @@ void Calibrate_SensorAngle(int setPoint)
 {
 	double leftSensor;
 	double rightSensor;
-	for (int i = 0; i < 6; i++)
+	for (int i = 0; i < 10; i++)
 	{
 		
 		//Align both sensors forward first, regardless whether its far or near
@@ -67,14 +67,14 @@ void Calibrate_SensorAngle(int setPoint)
 
 		double sensorDiff = abs(leftSensor - rightSensor);
 
-		if (sensorDiff <= 0.2)
+		if (sensorDiff <= 0.0)
 			break;
 
 		//if (sensorDiff == 0) //Aligned
 		//	break;
 
 		//Atan returns radian. Convert rad to deg by multiplying 180/PI
-		double angle = atan(sensorDiff / 15.0) * 180 / PI;
+		double angle = atan(sensorDiff / 15) * 180 / PI;
 		
 		Serial.print(leftSensor);
 		Serial.print(", ");
@@ -107,6 +107,8 @@ void Calibrate_SensorAngle(int setPoint)
 	//Move forward to make one sensor read 10cm
 	Calibrate_Forward(setPoint);
 
+	Serial.println("End of calibration");
+
 }
 //Move forward until one sensor reads setPoint distance
 void Calibrate_Forward(int setPoint) 
@@ -120,17 +122,47 @@ void Calibrate_Forward(int setPoint)
 		//If positive, it means that the robot is too far from the setpoint
 		double distance = leftSensor - setPoint;
 
+		Serial.print("Distance: ");
+		Serial.println(distance);
 		if (distance > 0) //Robot away from setpoint
 		{
-			motor.Forward(1, false);
+			//Absolute distance must be passed in as a negative value will mess up the Forward function
+			//to indicate reverse instead, we pass true in the second argument
+			motor.Forward(abs(distance), false);
 		}
 		else if (distance < 0) //Robot too 
 		{
-			motor.Forward(1, true);
+			motor.Forward(abs(distance), true);
 		}
 		else
 			break;
 	}
+}
+
+void CalibrationTest()
+{
+	Calibrate_SensorAngle(18);
+
+	//Turn left
+	motor.Turn(-90);
+	delay(100);
+
+	//Calibrate
+	Calibrate_SensorAngle(18);
+
+	//Turn right
+	motor.Turn(90);
+	delay(100);
+
+	//Calibrate
+	Calibrate_SensorAngle(18);
+
+	//Turn left
+	motor.Turn(-90);
+	delay(100);
+
+	//Calibrate
+	Calibrate_SensorAngle(18);
 }
 
 void setup()
@@ -145,8 +177,12 @@ void setup()
 
 	motor.begin();
 
-	Calibrate_SensorAngle(10);
+	//motor.Forward(100, false);
 	
+	
+	
+
+
 	/*for (int i = 0; i < 4; ++i)
 	{
 		if (i % 2)
@@ -161,22 +197,17 @@ void setup()
 	}*/
 }
 
-int prevTime = 0;
+bool turn = 1;
 void loop()
 {
-	//To update RPM for use by PID
-	//motor.CalcTicks();
-	//sensor.GetDistance(RobotSensor::FRONT_LEFT);
+	motor.CalcTicks();
 
-	//if ((millis() - prevTime) >= 500) // print very 500 ms
-	//{
-	//	Serial.print("FL: ");
-	//	Serial.print(ir_FL.getDistance());
 
-	//	Serial.print("FR: ");
-	//	Serial.print(ir_FR.getDistance());
-
-	//	Serial.println();
+	while (turn)
+	{
+		motor.Turn(-90);
+		delay(1000);
+	}
 
 	//	prevTime = millis();
 	//}

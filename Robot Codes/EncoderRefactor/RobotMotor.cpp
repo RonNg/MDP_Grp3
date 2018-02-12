@@ -73,16 +73,10 @@ double RobotMotor::ComputePID(double consKp, double consKi, double consKd, char 
 	return ((consKp * error) + (consKi * errSum) + (consKd * dErr));
 }
 
-void RobotMotor::ForwardCalibration(int rpm)
+void RobotMotor::CalibrationForward(int rpm)
 {
-	/*if (!runOnce)
-	{
-		md.setSpeeds(280, 280);
-		runOnce = true;
-		delay(1500);
-			
-	}*/
 
+	
 	m1Power += ComputePID(0.0002, 0, 0.00005, 'f', rpm, MOTOR_LEFT);
 	m2Power += ComputePID(0.0002, 0, 0.00005, 'f', rpm, MOTOR_RIGHT);
 
@@ -97,15 +91,16 @@ void RobotMotor::ForwardCalibration(int rpm)
 
 void RobotMotor::Forward(double cm, bool reverse)
 {
+	Serial.println(cm);
 	int targetTick = cm * TICKS_PER_CM;
 	m1TargetCounter = m2TargetCounter = 0;
 
-	Serial.println("Start of forward");
+	Serial.println("Forward");
 
 	m1Power = 200;
 	m2Power = 200;
 
-	while (m1TargetCounter < targetTick  || m2TargetCounter < targetTick)
+	while (m1TargetCounter < targetTick - 50  || m2TargetCounter < targetTick - 50)
 	{
 		CalcTicks();
 
@@ -116,8 +111,8 @@ void RobotMotor::Forward(double cm, bool reverse)
 		Serial.print(m2RPM);
 		Serial.println();
 
-		m1Power += ComputePID(0.0025, 0, 0.0005, 'f', 100, MOTOR_LEFT);
-		m2Power += ComputePID(0.008, 0, 0.0005, 'f', 100, MOTOR_RIGHT);
+		m1Power += ComputePID(0.0025, 0, 0.0005, 'f', 80, MOTOR_LEFT);
+		m2Power += ComputePID(0.0026, 0, 0.0005, 'f', 80, MOTOR_RIGHT);
 
 		if (m1Power < 0)
 			m1Power = 0;
@@ -132,8 +127,8 @@ void RobotMotor::Forward(double cm, bool reverse)
 	}
 
 	md.setBrakes(400, 400);
+	
 }
-
 
 void RobotMotor::Turn(double angle)
 {
@@ -150,13 +145,13 @@ void RobotMotor::Turn(double angle)
 	//int targetTick = 6.67 * TICKS_PER_CM;
 
 	//Convert angle to cm
-
 	float distance = PI * 17.0 * abs(angle) / 360.0;
-
+	
+	m1Power = m2Power = 0;
 	int targetTick = distance * TICKS_PER_CM;
 	m1TargetCounter = m2TargetCounter = 0;
 
-	while (m1TargetCounter < targetTick - 120 || m2TargetCounter < targetTick - 120)
+	while (m1TargetCounter < targetTick - 100 || m2TargetCounter < targetTick - 80)
 	{
 		CalcTicks();
 		  
@@ -167,8 +162,11 @@ void RobotMotor::Turn(double angle)
 		//Serial.print(m2RPM);
 		//Serial.println();
 
-		m1Power += ComputePID(0.0025, 0, 0.0005, 'f', 40, MOTOR_LEFT);
-		m2Power += ComputePID(0.0025, 0, 0.0005, 'f', 40, MOTOR_RIGHT);
+		
+
+
+		m1Power += ComputePID(0.0025, 0, 0.0005, 'f', 80, MOTOR_LEFT);
+		m2Power += ComputePID(0.0025, 0, 0.0005, 'f', 80, MOTOR_RIGHT);
 
 		
 		if (angle > 0) //Positive angle indicates clockwise
@@ -181,5 +179,7 @@ void RobotMotor::Turn(double angle)
 	Serial.print(", ");
 	Serial.print(m2Power);
 
-	md.setBrakes(400, 400);
+	md.setBrakes(390, 390);
+
+	
 }

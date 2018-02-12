@@ -54,7 +54,8 @@ public:
 	void begin();
 	void CalcTicks();
 
-	void ForwardCalibration(int rpm);
+	//Returns true when hit target tick
+	void CalibrationForward(int rpm);
 	void Forward(double cm, bool reverse);	
 	void Turn(double angle);
 
