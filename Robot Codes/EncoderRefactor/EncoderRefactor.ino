@@ -169,6 +169,7 @@ void setup()
 {
 	Serial.begin(9600);
 	Serial.println("Encoder Interrupt Test:");
+
 	enableInterrupt(M1A, m1Change, CHANGE);
 	enableInterrupt(M1B, m1Change, CHANGE);
 
@@ -179,9 +180,6 @@ void setup()
 
 	//motor.Forward(100, false);
 	
-	
-	
-
 
 	/*for (int i = 0; i < 4; ++i)
 	{

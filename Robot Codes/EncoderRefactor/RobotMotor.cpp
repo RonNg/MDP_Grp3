@@ -127,7 +127,6 @@ void RobotMotor::Forward(double cm, bool reverse)
 	}
 
 	md.setBrakes(400, 400);
-	
 }
 
 void RobotMotor::Turn(double angle)
