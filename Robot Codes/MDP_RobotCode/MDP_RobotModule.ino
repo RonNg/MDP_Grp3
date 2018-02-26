@@ -1,12 +1,9 @@
-#include <SharpIR.h>
 #include <DualVNH5019MotorShield.h>
 #include <EnableInterrupt.h>
-
 #include "RobotMotor.h"
 #include "RobotSensor.h"
-
 #include <math.h>
-
+#include <SharpIR.h>
 
 RobotMotor motor;
 #define DIST_BETWEEN_FRONT_SENSOR 10 //distance (lens to lens) of IR_FL and IR_FR
@@ -17,9 +14,9 @@ RobotMotor motor;
 21YK Sensor range 10-80cm (Small Sensor)
 ==*/
 
-SharpIR ir_FL(A0, 1080);
-SharpIR ir_FR(A1, 1080);
-SharpIR ir_FC(A2, 1080); //Front center
+SharpIR ir_FL(GP2Y0A21YK0F, A0);
+SharpIR ir_FR(GP2Y0A21YK0F, A1);
+SharpIR ir_FC(GP2Y0A21YK0F, A2); //Front center
 
 
 
@@ -65,128 +62,126 @@ void CalibrationRPM()
 }
 
 //Makes both sensors aligned with each other i.e. have both sensors measure same distance from the front
-void Calibrate_Angle(int setPoint)
+void Calibrate_Angle()
 {
 	double leftSensor;
 	double rightSensor;
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < 10; ++ i )
 	{
-		
 		//Align both sensors forward first, regardless whether its far or near
-		leftSensor = ir_FL.distance(); 
-		rightSensor = ir_FR.distance();
+		leftSensor = ir_FL.getDistance(); 
+		rightSensor = ir_FR.getDistance();
 
 		double sensorDiff = abs(leftSensor - rightSensor);
 
 		if (sensorDiff <= 0.0)
 			break;
-
-		//if (sensorDiff == 0) //Aligned
-		//	break;
-
+	
 		//Atan returns radian. Convert rad to deg by multiplying 180/PI
-		double angle = atan(sensorDiff / 15) * 180 / PI;
+		double angle = atan(sensorDiff / 14) * 180 / PI;
 		
-		Serial.print(leftSensor);
-		Serial.print(", ");
-		Serial.print(rightSensor);
-		Serial.print(" Sensor Diff: ");
-		Serial.print(sensorDiff);
-
-
-		Serial.print("  Angle: ");
-		Serial.println(angle);
 
 		//Left is further
 		if (leftSensor > rightSensor)
 		{
 			//Turn right
-			Serial.print("   Turn Right");
+			//Serial.print("   Turn Right");
 			motor.Turn(angle);
-			delay(100);
 
 		}
 		else //Right is further
 		{
 			//Turn left
-			Serial.print("   Turn Left");
+			//Serial.print("   Turn Left");
 			motor.Turn(-angle);
-			delay(100);
 		}
 	}
+
+	Serial.println("End calibration");
 }
 //Move forward until one sensor reads setPoint distance
-bool Calibrate_Forward(int setPoint) 
+void Calibrate_Forward(int setPoint) 
 {
 
-	double leftSensor = ir_FL.distance();
-
-	//Distance between robot and setpoint
-	//If negative, it means that the robot is too near from the setpoint
-	//If positive, it means that the robot is too far from the setpoint
-	double distance = leftSensor - setPoint;
-
-	Serial.print("Distance: ");
-	Serial.println(distance);
-	if (distance > 0) //Robot away from setpoint
+	for (int i = 0; i < 5; ++i)
 	{
-		//Absolute distance must be passed in as a negative value will mess up the Forward function
-		//to indicate reverse instead, we pass true in the second argument
-		motor.Forward(abs(distance), false);
-		return 0;
-	}
-	else if (distance < 0) //Robot too 
-	{
-		motor.Forward(abs(distance), true);
-		return 0;
-	}
-	else
-		return 1;
+		double frontSensor = ir_FL.getDistance();
 
+		//Distance between robot and setpoint
+		//If negative, it means that the robot is too near from the setpoint
+		//If positive, it means that the robot is too far from the setpoint
+		double distance = frontSensor - setPoint;
+
+		if (distance == 0)
+			break;
+
+		Serial.print("Distance: ");
+		Serial.println(distance);
+		if (distance > 0) //Robot away from setpoint
+		{
+			//Absolute distance must be passed in as a negative value will mess up the Forward function
+			//to indicate reverse instead, we pass true in the second argument
+			motor.Forward(abs(distance), false);
+		}
+		else if (distance < 0) //Robot too 
+		{
+			motor.Forward(abs(distance), true);
+		}
+	}
 }
 
 void Calibrate_Full(int setPoint)
 {
-	Calibrate_Angle(setPoint);
+	//Calibrate_Angle(setPoint);
 
-	while (!Calibrate_Forward(setPoint))
-	{
-
-		Calibrate_Angle(setPoint);
-
-	}
+	//while (!Calibrate_Forward(setPoint))
+	//{
+	//	Calibrate_Angle(setPoint);
+	//}
 
 }
 
 void CalibrationTest(int setPoint)
 {
-	Calibrate_Angle(setPoint);
+	Calibrate_Angle();
+	Calibrate_Forward(setPoint);
 
 	//Turn left
-	motor.Turn90(false);
+	motor.TurnLeft90();
 	delay(100);
 
-	//Calibrate
-	Calibrate_Full(setPoint);
-
-	//Turn right
-	motor.Turn90(true);
-	delay(100);
 
 	//Calibrate
-	Calibrate_Full(setPoint);
+	Calibrate_Angle();
+	Calibrate_Forward(setPoint);
+
 
 	//Turn left
-	motor.Turn90(false);
+	motor.TurnRight90();
 	delay(100);
 
+
 	//Calibrate
-	Calibrate_Full(setPoint);
+	Calibrate_Angle();
+	Calibrate_Forward(setPoint);
+
+	//Turn left
+	motor.TurnLeft90();
+	delay(100);
+
+
+	//Calibrate
+	Calibrate_Angle();
+	Calibrate_Forward(setPoint);
+
+
+
+
 }
 
 void TestSensor()
 {
-	Serial.println(ir_FC.distance());
+	Serial.println(ir_FC.getDistance());
 }
 
 void setup()
@@ -201,24 +196,19 @@ void setup()
 
 	motor.begin();
 
+	//motor.Turn(-10);
 
-
-
-	/*for (int i = 0; i < 15; ++i)
-	{
-		motor.Forward10(false);
-		delay(500);
-	}*/
-
-	//motor.Forward(150, false);
+	CalibrationTest(12);
+	//Calibrate_Angle();
 
 }
 
 void loop()
 {
-	motor.CalcTicks();
-	
-	motor.Turn90(true);
-	delay(1000);
-}
+	//motor.CalcTicks
+	/*Serial.print(ir_FL.getDistance());
+	Serial.print(", ");
+	Serial.println(ir_FR.getDistance());
+*/
 
+}

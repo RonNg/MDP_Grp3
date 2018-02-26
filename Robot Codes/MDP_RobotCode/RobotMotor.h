@@ -62,7 +62,7 @@ public:
 
 
 	//Specially calibrated version of Right turn.
-	void Turn90(bool turnRight);
-
+	void TurnRight90();
+	void TurnLeft90();
 };
 

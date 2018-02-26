@@ -1,5 +1,4 @@
 #pragma once
-#include <SharpIR.h>
 
 /*==
 2YK Sensors range 20-150cm (Big sensor)
