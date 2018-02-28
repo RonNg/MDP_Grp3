@@ -114,7 +114,7 @@ void Calibrate_SideAngle()
 	{
 		//Align both sensors forward first, regardless whether its far or near
 		leftSensor = ir_RF.getDistance();
-		rightSensor = ir_RB.getDistance();
+		rightSensor = ir_RB.getDistance() + 1;
 
 		double sensorDiff = abs(leftSensor - rightSensor);
 
@@ -141,7 +141,7 @@ void Calibrate_SideAngle()
 		}
 	}
 
-	Serial.println("End calibration");
+	delay(200);
 }
 
 //Move forward until one sensor reads setPoint distance
@@ -174,7 +174,6 @@ void Calibrate_Forward(int setPoint)
 		}
 	}
 }
-
 
 
 void Calibrate_Full(int setPoint)
@@ -240,21 +239,26 @@ void CalibrationTest()
 }
 
 
-void Checklist_Obstacle(int distance)
+void Checklist_Obstacle90(int distance)
 {
-	int travelled = ((distance-30)/10);
-
-	Serial.println(travelled);
+	int travelled = ((distance)/10);
+	travelled -= 5;
+	
 	CalibrationTest();
 
-	while (ir_FC.getDistance() > 10)
+	while (ir_FC.getDistance() > 15)
 	{
 		motor.Forward10(false);
 		--travelled;
 	}
 
+
+
 	//Obstacle Avoidance Start
 	Calibrate_SideAngle();
+	Calibrate_Forward(15);
+
+	motor.Forward10(false); 
 
 	motor.TurnLeft90();
 
@@ -306,17 +310,13 @@ void setup()
 
 	motor.begin();
 
-	//Checklist_Obstacle(90);
-	for (int i = 0; i < 5; ++i)
-		motor.Forward10();
+	Checklist_Obstacle90(100);
+	//for(int i = 0; i < 4; ++ i)
+	//motor.Forward10(false);
 }
 
 void loop()
 {
 	//motor.CalcTicks
-	Serial.println(ir_FC.getDistance());
-
-	delay(500);
-	
 
 }

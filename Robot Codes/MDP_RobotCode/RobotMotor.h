@@ -8,11 +8,9 @@
 #define MOTOR_LEFT 1
 #define MOTOR_RIGHT 2
 
-#define PRATIO_LEFT 3.17383
-#define PRATIO_RIGHT 3.23021
+#define PRATIO_LEFT 3.17383 //1 power = 3.17 RPM for left motor
+#define PRATIO_RIGHT 3.23021 //1 power = 3.23 RPM for right motor
 
-
-#define INITIAL_POW 220
 
 class RobotMotor
 {
