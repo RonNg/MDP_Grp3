@@ -21,6 +21,7 @@ SharpIR ir_FR(GP2Y0A21YK0F, A1);
 SharpIR ir_FC(GP2Y0A21YK0F, A2); //Front center
 SharpIR ir_RF(GP2Y0A21YK0F, A3); //Right Forward
 SharpIR ir_RB(GP2Y0A21YK0F, A4); //Right Back
+SharpIR ir_LF(GP2Y0A02YK0F, A5);
 
 
 
@@ -297,6 +298,66 @@ void Checklist_Obstacle90(int distance)
 		--travelled;
 	}
 }
+void Checklist_Obstacle45(int distance)
+{
+	CalibrationTest();
+	int travelled = distance / 10;
+
+	travelled -= 6;
+
+
+	while (ir_FC.getDistance() > 10)
+	{
+		motor.Forward10(false);
+		-- travelled;
+	}
+
+	Calibrate_Forward(16);
+
+	//Diagonal turning left to avoid obstacle
+	//Start
+	motor.TurnLeft45();
+	motor.Forward10(false);
+	motor.Forward10(false);
+	motor.Forward10(false);
+	motor.TurnRight45();
+
+	motor.Forward10(false);
+	motor.Forward10(false);
+
+	motor.TurnRight45();
+
+	motor.Forward10(false);
+	motor.Forward10(false);
+	motor.Forward10(false);
+
+	motor.TurnRight45();
+	//end
+
+	//Behind the block now, making sure we're still along our intended line by calibrating and using the obstacle for ref
+	//Start
+	Calibrate_Forward(15);
+
+	motor.TurnRight90();
+
+	Calibrate_Forward(15);
+
+	motor.TurnLeft90();
+	motor.TurnLeft90();
+
+	Calibrate_SideAngle();
+	//End
+
+	while(travelled > 0)
+	{
+		motor.Forward10(false);
+		--travelled;
+	}
+
+
+	
+}
+
 
 void setup()
 {
@@ -311,12 +372,10 @@ void setup()
 	motor.begin();
 
 	Checklist_Obstacle90(100);
-	//for(int i = 0; i < 4; ++ i)
-	//motor.Forward10(false);
+	//Checklist_Obstacle45(100);
 }
 
 void loop()
 {
-	//motor.CalcTicks
 
 }

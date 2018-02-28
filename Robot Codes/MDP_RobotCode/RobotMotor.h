@@ -59,7 +59,12 @@ public:
 	void Turn(double angle);
 
 
-	//Specially calibrated version of Right turn.
+
+	//Specially calibrated version of Left and right 45 degree turn
+	void TurnLeft45();
+	void TurnRight45();
+
+	//Specially calibrated version of Left and right 90 degree turn.
 	void TurnRight90();
 	void TurnLeft90();
 };
