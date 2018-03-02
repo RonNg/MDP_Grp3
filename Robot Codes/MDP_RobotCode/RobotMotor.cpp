@@ -38,7 +38,7 @@ void RobotMotor::CalcTicks()
 
 double RobotMotor::ComputePID(double consKp, double consKi, double consKd, char direction, double targetRPM, int motorNo)
 {
-		
+
 	int currentRPM;
 	//int ratio = 0;
 
@@ -69,7 +69,7 @@ double RobotMotor::ComputePID(double consKp, double consKi, double consKd, char 
 void RobotMotor::CalibrationForward(int rpm)
 {
 
-	
+
 	m1Power += ComputePID(0.0002, 0, 0.00005, 'f', rpm, MOTOR_LEFT);
 	m2Power += ComputePID(0.0002, 0, 0.00005, 'f', rpm, MOTOR_RIGHT);
 
@@ -92,7 +92,7 @@ void RobotMotor::Forward(double cm, bool reverse)
 	ResetPID();
 
 	m1Power = m2Power = 100;
-	
+
 
 	while (m1TargetCounter < targetTick - 60 || m2TargetCounter < targetTick - 60)
 	{
@@ -162,6 +162,41 @@ void RobotMotor::Forward10(bool reverse)
 
 }
 
+void RobotMotor::ForwardChecklist(int cm)
+{
+	int targetTick = cm * TICKS_PER_CM;
+	m1TargetCounter = m2TargetCounter = 0;
+	m1Ticks = m2Ticks = 0;
+	lastTime = 0;
+
+	ResetPID();
+
+	m1Power = m2Power = 150;
+
+
+	while (m1TargetCounter < targetTick - 60 || m2TargetCounter < targetTick - 60)
+	{
+		CalcTicks();
+
+		m1Power += ComputePID(0.000047, 0, 0.005, 'f', 100, MOTOR_LEFT);
+		m2Power += ComputePID(0.0000505, 0, 0.005, 'f', 100, MOTOR_RIGHT);
+
+		if (m1Power < 0)
+			m1Power = 0;
+
+		if (m2Power < 0)
+			m2Power = 0;
+
+		md.setSpeeds(m1Power, m2Power);
+
+	}
+
+	md.setSpeeds(0, 0);
+	md.setBrakes(400, 400);
+	delay(200);
+
+}
+
 void RobotMotor::Turn(double angle)
 {
 	//Convert angle to cm
@@ -169,7 +204,7 @@ void RobotMotor::Turn(double angle)
 	int targetTick = distance * TICKS_PER_CM;
 
 	//ResetPID();
-	
+
 	m1Power = m2Power = 0;
 	m1TargetCounter = m2TargetCounter = 0;
 	m1Ticks = m2Ticks = 0;
@@ -182,7 +217,7 @@ void RobotMotor::Turn(double angle)
 		m1Power += ComputePID(0.00048, 0, 0.0005, 'f', 100, MOTOR_LEFT);
 		m2Power += ComputePID(0.0005, 0, 0.0003, 'f', 100, MOTOR_RIGHT);
 
-		
+
 		if (angle > 0) //Positive angle indicates clockwise
 			md.setSpeeds(m1Power, -m2Power);
 		else
@@ -300,7 +335,7 @@ void RobotMotor::TurnRight45()
 void RobotMotor::TurnRight90()
 {
 	//Convert angle to cm
-	float distance = PI * 17.0 * (90.0/360.0);
+	float distance = PI * 17.0 * (90.0 / 360.0);
 	int targetTick = distance * TICKS_PER_CM;
 
 
@@ -308,13 +343,13 @@ void RobotMotor::TurnRight90()
 	ResetPID(); //Reset PID to prevent errors from growing and growing
 	m1Power = m2Power = 150;
 	m1TargetCounter = m2TargetCounter = 0;
-	m1Ticks = m2Ticks = 0;	
+	m1Ticks = m2Ticks = 0;
 	lastTime = 0;		//For calculating ticks
-	
+
 
 	md.setBrakes(0, 0);
 	md.setSpeeds(0, 0);
-	
+
 	while (m1TargetCounter < targetTick - 70 || m2TargetCounter < targetTick - 90)
 	{
 		CalcTicks();
@@ -323,7 +358,7 @@ void RobotMotor::TurnRight90()
 		m2Power += ComputePID(0.00051, 0, 0.0005, 'f', 100, MOTOR_RIGHT);
 
 		md.setSpeeds(m1Power, -m2Power);
-	
+
 	}
 
 	md.setSpeeds(0, 0);

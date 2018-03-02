@@ -55,6 +55,7 @@ public:
 	//Returns true when hit target tick
 	void CalibrationForward(int rpm);
 	void Forward10(bool reverse);	
+	void ForwardChecklist(int cm);
 	void Forward(double cm, bool reverse);
 	void Turn(double angle);
 

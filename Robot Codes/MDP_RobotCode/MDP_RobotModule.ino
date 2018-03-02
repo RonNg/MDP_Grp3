@@ -371,11 +371,76 @@ void setup()
 
 	motor.begin();
 
-	Checklist_Obstacle90(100);
+	//Checklist_Obstacle90(100);
 	//Checklist_Obstacle45(100);
+	//motor.ForwardChecklist(150);
+	//motor.Turn(1080);
 }
+
+const int readBufferSize = 50;
+//char commands[readBufferSize] = { 'f', 'r', 's', 'l', 'f',
+//								  'f', 'f', 's', 'r', 'f'};
+
+String commands;
+int currIndex = 0; //Current command index
+int commandLength = 0;
+
+void ClearBuffer()
+{
+	for (int i = 0; i < readBufferSize; ++i)
+		commands[i] = '-';
+}
+
 
 void loop()
 {
+	if (Serial.available()) //Checks how many bytes available. sizeof(char) = 1 byte
+	{
+		while(Serial.available()>0)
+		{
+			char temp = Serial.read();
+			commands += temp;//Post increment so that currIndex and lastIndex is mismatched i.e. currIndex = 0, lastIndex will always be ahead of currIndex
 
+		}
+	}
+
+	for (commandLength = 0; commands[commandLength] != '\0'; ++commandLength);
+
+
+	while (currIndex < commandLength)
+	{
+
+		char command = commands[currIndex];
+/*
+		Serial.print("Read buffer index: ");
+		Serial.println(currIndex);
+
+		Serial.print("Command: ");
+		Serial.println(commands[currIndex]);
+*/
+		++currIndex;
+		
+		switch (command)
+		{
+		case 'f':
+			motor.Forward10(false);
+			break;
+		case 'r': //Turn right 90
+			motor.TurnRight90();
+			break;
+		case 'l': //Turn left 90
+			motor.TurnLeft90();
+			break;
+		case 's': //Reverse
+			motor.Forward10(true);
+			break;
+		default: 
+			break;
+		}
+	}
+
+	//delay(1000);
+	//Serial.println(ir_FC.getDistance());
+	//Serial.println(ir_LF.getDistance());
+	//delay(1000);
 }
