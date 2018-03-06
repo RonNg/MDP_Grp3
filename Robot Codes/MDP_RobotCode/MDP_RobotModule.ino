@@ -19,12 +19,9 @@ RobotMotor motor;
 SharpIR ir_FL(GP2Y0A21YK0F, A0);
 SharpIR ir_FR(GP2Y0A21YK0F, A1);
 SharpIR ir_FC(GP2Y0A21YK0F, A2); //Front center
-SharpIR ir_RF(GP2Y0A21YK0F, A3); //Right Forward
-SharpIR ir_RB(GP2Y0A21YK0F, A4); //Right Back
-SharpIR ir_LF(GP2Y0A02YK0F, A5);
-
-
-
+SharpIR ir_SF(GP2Y0A21YK0F, A3); //Right Forward
+SharpIR ir_SB(GP2Y0A21YK0F, A4); //Right Back
+SharpIR ir_LM(GP2Y0A02YK0F, A5);
 
 //------------------Motor Pins ---------------------//
 const int M1A = 3;
@@ -33,18 +30,15 @@ const int M2A = 11;
 const int M2B = 13;
 
 //Encoder rising edge tick++
-void m1Change() 
-{ 
-	motor.M1Change(); 
+void m1Change()
+{
+	motor.M1Change();
 }
 
-void m2Change() 
-{ 
-	motor.M2Change(); 
+void m2Change()
+{
+	motor.M2Change();
 }
-
-
-
 
 void RPMBenchtest()
 {
@@ -72,20 +66,20 @@ void Calibrate_Angle()
 {
 	double leftSensor;
 	double rightSensor;
-	for (int i = 0; i < 10; ++ i )
+	for (int i = 0; i < 10; ++i)
 	{
 		//Align both sensors forward first, regardless whether its far or near
-		leftSensor = ir_FL.getDistance(); 
+		leftSensor = ir_FL.getDistance();
 		rightSensor = ir_FR.getDistance();
 
 		double sensorDiff = abs(leftSensor - rightSensor);
 
 		if (sensorDiff <= 0.0)
 			break;
-	
+
 		//Atan returns radian. Convert rad to deg by multiplying 180/PI
 		double angle = atan(sensorDiff / 14) * 180 / PI;
-		
+
 
 		//Left is further
 		if (leftSensor > rightSensor)
@@ -103,7 +97,6 @@ void Calibrate_Angle()
 		}
 	}
 
-	Serial.println("End calibration");
 }
 
 //Calibrates right side to align straight
@@ -114,8 +107,8 @@ void Calibrate_SideAngle()
 	for (int i = 0; i < 10; ++i)
 	{
 		//Align both sensors forward first, regardless whether its far or near
-		leftSensor = ir_RF.getDistance();
-		rightSensor = ir_RB.getDistance() + 1;
+		leftSensor = ir_SF.getDistance() - 1;
+		rightSensor = ir_SB.getDistance();
 
 		double sensorDiff = abs(leftSensor - rightSensor);
 
@@ -146,7 +139,7 @@ void Calibrate_SideAngle()
 }
 
 //Move forward until one sensor reads setPoint distance
-void Calibrate_Forward(int setPoint) 
+void Calibrate_Forward(int setPoint)
 {
 
 	for (int i = 0; i < 5; ++i)
@@ -161,8 +154,6 @@ void Calibrate_Forward(int setPoint)
 		if (distance == 0)
 			break;
 
-		Serial.print("Distance: ");
-		Serial.println(distance);
 		if (distance > 0) //Robot away from setpoint
 		{
 			//Absolute distance must be passed in as a negative value will mess up the Forward function
@@ -175,7 +166,6 @@ void Calibrate_Forward(int setPoint)
 		}
 	}
 }
-
 
 void Calibrate_Full(int setPoint)
 {
@@ -239,17 +229,16 @@ void CalibrationTest()
 	Calibrate_SideAngle();
 }
 
-
 void Checklist_Obstacle90(int distance)
 {
-	int travelled = ((distance)/10);
+	int travelled = ((distance) / 10);
 	travelled -= 5;
-	
+
 	CalibrationTest();
 
 	while (ir_FC.getDistance() > 15)
 	{
-		motor.Forward10(false);
+		motor.Forward10();
 		--travelled;
 	}
 
@@ -259,13 +248,13 @@ void Checklist_Obstacle90(int distance)
 	Calibrate_SideAngle();
 	Calibrate_Forward(15);
 
-	motor.Forward10(false); 
+	motor.Forward10();
 
 	motor.TurnLeft90();
 
-	motor.Forward10(false);
+	motor.Forward10();
 
-	motor.Forward10(false);
+	motor.Forward10();
 
 	motor.TurnRight90();
 	//Calibrate_SideAngle();
@@ -273,15 +262,15 @@ void Checklist_Obstacle90(int distance)
 
 	for (int i = 0; i < 4; ++i)
 	{
-		motor.Forward10(false);
+		motor.Forward10();
 	}
 
 	motor.TurnRight90();
-	
 
-	motor.Forward10(false);
 
-	motor.Forward10(false);
+	motor.Forward10();
+
+	motor.Forward10();
 
 	Calibrate_Angle();
 
@@ -294,10 +283,11 @@ void Checklist_Obstacle90(int distance)
 	//Obstacle Avoidance End
 	while (travelled > 0)
 	{
-		motor.Forward10(false);
+		motor.Forward10();
 		--travelled;
 	}
 }
+
 void Checklist_Obstacle45(int distance)
 {
 	CalibrationTest();
@@ -308,8 +298,8 @@ void Checklist_Obstacle45(int distance)
 
 	while (ir_FC.getDistance() > 10)
 	{
-		motor.Forward10(false);
-		-- travelled;
+		motor.Forward10();
+		--travelled;
 	}
 
 	Calibrate_Forward(16);
@@ -317,19 +307,19 @@ void Checklist_Obstacle45(int distance)
 	//Diagonal turning left to avoid obstacle
 	//Start
 	motor.TurnLeft45();
-	motor.Forward10(false);
-	motor.Forward10(false);
-	motor.Forward10(false);
+	motor.Forward10();
+	motor.Forward10();
+	motor.Forward10();
 	motor.TurnRight45();
 
-	motor.Forward10(false);
-	motor.Forward10(false);
+	motor.Forward10();
+	motor.Forward10();
 
 	motor.TurnRight45();
 
-	motor.Forward10(false);
-	motor.Forward10(false);
-	motor.Forward10(false);
+	motor.Forward10();
+	motor.Forward10();
+	motor.Forward10();
 
 	motor.TurnRight45();
 	//end
@@ -348,16 +338,30 @@ void Checklist_Obstacle45(int distance)
 	Calibrate_SideAngle();
 	//End
 
-	while(travelled > 0)
+	while (travelled > 0)
 	{
-		motor.Forward10(false);
+		motor.Forward10();
 		--travelled;
 	}
 
 
-	
+
 }
 
+void SendSensorValues()
+{
+	int fl = ir_FL.getDistance();
+	int fc = ir_FC.getDistance();
+	int fr = ir_FR.getDistance();
+
+	int lm = ir_LM.getDistance();
+	int rf = ir_SF.getDistance();
+	int rb = ir_SB.getDistance();
+
+	Serial.println("SENSOR|" + String(fl) + "|" + String(fc) + "|" + String(fr) + "|" + String(rf) + "|" + String(rb)  + "|" + String(lm) );
+	//SENSOR|17|15|17|30|20|20
+
+}
 
 void setup()
 {
@@ -377,29 +381,18 @@ void setup()
 	//motor.Turn(1080);
 }
 
-const int readBufferSize = 50;
-//char commands[readBufferSize] = { 'f', 'r', 's', 'l', 'f',
-//								  'f', 'f', 's', 'r', 'f'};
-
 String commands;
 int currIndex = 0; //Current command index
 int commandLength = 0;
-
-void ClearBuffer()
-{
-	for (int i = 0; i < readBufferSize; ++i)
-		commands[i] = '-';
-}
-
 
 void loop()
 {
 	if (Serial.available()) //Checks how many bytes available. sizeof(char) = 1 byte
 	{
-		while(Serial.available()>0)
+		while (Serial.available() > 0)
 		{
 			char temp = Serial.read();
-			commands += temp;//Post increment so that currIndex and lastIndex is mismatched i.e. currIndex = 0, lastIndex will always be ahead of currIndex
+			commands += temp; //Adds the character into the string
 
 		}
 	}
@@ -410,37 +403,54 @@ void loop()
 	while (currIndex < commandLength)
 	{
 
-		char command = commands[currIndex];
-/*
-		Serial.print("Read buffer index: ");
-		Serial.println(currIndex);
+		char command = commands[currIndex++]; //Get command from String by treating it as an array
 
-		Serial.print("Command: ");
-		Serial.println(commands[currIndex]);
-*/
-		++currIndex;
-		
 		switch (command)
 		{
-		case 'f':
-			motor.Forward10(false);
+			//WASD is for movement
+		case 'w':
+			motor.Forward10();
+			Serial.println('w');
 			break;
-		case 'r': //Turn right 90
-			motor.TurnRight90();
+		case 'W':
+			motor.Forward30();
+			Serial.println('W');
 			break;
-		case 'l': //Turn left 90
-			motor.TurnLeft90();
+		case 'q':
 			break;
 		case 's': //Reverse
-			motor.Forward10(true);
+			motor.Turn180();
+			Serial.println('s');
 			break;
-		default: 
+		case 'a': //Turn left 90
+			motor.TurnLeft90();
+			Serial.println('a');
+			break;
+		case 'd': //Turn right 90
+			motor.TurnRight90();
+			Serial.println('d');
+			break;
+
+			//TFGH is for calibration
+		case 't':
+			Calibrate_Forward(15);
+			Serial.println("Calibrate Forward");
+			break;
+		case 'g':
+			Calibrate_Angle();
+			Serial.println("Calibrate Front Angle");
+			break;
+		case 'h':
+			Calibrate_SideAngle();
+			Serial.println("Calibrate Side Angle");
+			break;
+
+			//IJL are for sensor readings
+		case 'k':
+			SendSensorValues();
+			break;
+		default:
 			break;
 		}
 	}
-
-	//delay(1000);
-	//Serial.println(ir_FC.getDistance());
-	//Serial.println(ir_LF.getDistance());
-	//delay(1000);
 }

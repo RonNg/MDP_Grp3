@@ -54,12 +54,17 @@ public:
 
 	//Returns true when hit target tick
 	void CalibrationForward(int rpm);
-	void Forward10(bool reverse);	
+	
 	void ForwardChecklist(int cm);
 	void Forward(double cm, bool reverse);
 	void Turn(double angle);
 
 
+
+	//Specially calibrated version of moving forward
+	void Forward10();
+	void Forward30();
+	void Forward50();
 
 	//Specially calibrated version of Left and right 45 degree turn
 	void TurnLeft45();
@@ -68,5 +73,7 @@ public:
 	//Specially calibrated version of Left and right 90 degree turn.
 	void TurnRight90();
 	void TurnLeft90();
+
+	void Turn180();
 };
 
