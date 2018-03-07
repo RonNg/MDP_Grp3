@@ -6,7 +6,6 @@
 #include <SharpIR.h>
 
 RobotMotor motor;
-#define DIST_BETWEEN_FRONT_SENSOR 10 //distance (lens to lens) of IR_FL and IR_FR
 
 /*==
 2YK Sensors range 20-150cm (Big sensor)
@@ -62,7 +61,7 @@ void CalibrationRPM()
 }
 
 //Makes both sensors aligned with each other i.e. have both sensors measure same distance from the front
-void Calibrate_Angle()
+void Calibrate_FrontAngle()
 {
 	double leftSensor;
 	double rightSensor;
@@ -180,7 +179,7 @@ void Calibrate_Full(int setPoint)
 
 void CalibrationTest()
 {
-	Calibrate_Angle();
+	Calibrate_FrontAngle();
 	delay(100);
 
 	Calibrate_Forward(15);
@@ -192,7 +191,7 @@ void CalibrationTest()
 
 
 	//Calibrate
-	Calibrate_Angle();
+	Calibrate_FrontAngle();
 	delay(100);
 
 	Calibrate_Forward(15);
@@ -205,7 +204,7 @@ void CalibrationTest()
 
 
 	//Calibrate
-	Calibrate_Angle();
+	Calibrate_FrontAngle();
 	delay(100);
 
 	Calibrate_Forward(15);
@@ -217,7 +216,7 @@ void CalibrationTest()
 
 
 	//Calibrate
-	Calibrate_Angle();
+	Calibrate_FrontAngle();
 	delay(100);
 
 	Calibrate_Forward(15);
@@ -272,7 +271,7 @@ void Checklist_Obstacle90(int distance)
 
 	motor.Forward10();
 
-	Calibrate_Angle();
+	Calibrate_FrontAngle();
 
 	Calibrate_Forward(15);
 
@@ -374,12 +373,13 @@ void setup()
 	enableInterrupt(M2B, m2Change, CHANGE);
 
 	motor.begin();
-
+	
 	//Checklist_Obstacle90(100);
 	//Checklist_Obstacle45(100);
 	//motor.ForwardChecklist(150);
 	//motor.Turn(1080);
 }
+
 
 String commands;
 int currIndex = 0; //Current command index
@@ -417,6 +417,8 @@ void loop()
 			Serial.println('W');
 			break;
 		case 'q':
+			motor.Forward50();
+			Serial.println('q');
 			break;
 		case 's': //Reverse
 			motor.Turn180();
@@ -433,11 +435,11 @@ void loop()
 
 			//TFGH is for calibration
 		case 't':
-			Calibrate_Forward(15);
+			Calibrate_Forward(13);
 			Serial.println("Calibrate Forward");
 			break;
 		case 'g':
-			Calibrate_Angle();
+			Calibrate_FrontAngle();
 			Serial.println("Calibrate Front Angle");
 			break;
 		case 'h':
@@ -454,3 +456,5 @@ void loop()
 		}
 	}
 }
+
+
