@@ -47,7 +47,7 @@ void RPMBenchtest()
 		motor.GetMotor().setSpeeds(setSpeed, setSpeed);
 		delay(1005);
 
-		motor.CalcTicks();
+		motor.CalcRPM();
 		motor.GetMotor().setBrakes(400, 400);
 		delay(1005);
 	}
@@ -106,7 +106,7 @@ void Calibrate_SideAngle()
 	for (int i = 0; i < 10; ++i)
 	{
 		//Align both sensors forward first, regardless whether its far or near
-		leftSensor = ir_SF.getDistance() - 1;
+		leftSensor = ir_SF.getDistance();
 		rightSensor = ir_SB.getDistance();
 
 		double sensorDiff = abs(leftSensor - rightSensor);
@@ -349,6 +349,7 @@ void Checklist_Obstacle45(int distance)
 
 void SendSensorValues()
 {
+	delay(500); //Delay in reading senosr
 	int fl = ir_FL.getDistance();
 	int fc = ir_FC.getDistance();
 	int fr = ir_FR.getDistance();
@@ -357,7 +358,57 @@ void SendSensorValues()
 	int rf = ir_SF.getDistance();
 	int rb = ir_SB.getDistance();
 
-	Serial.println("SENSOR|" + String(fl) + "|" + String(fc) + "|" + String(fr) + "|" + String(rf) + "|" + String(rb)  + "|" + String(lm) );
+	//Short range
+	
+	if (fc <= 18)
+	{
+		fc = 1;
+	}
+	else if (fc >= 18 && fc < 25)
+	{
+		fc = 2;
+	}
+	else if (fc >= 25 && fc < 32)
+	{
+		fc = 3;
+	}
+	else
+	{
+		fc = -1;
+	} 
+
+
+	//Long range
+	if (lm <= 19)
+	{
+		lm = 1;
+	}
+	else if (lm > 19 && lm < 30)
+	{
+		lm = 2;
+	}
+	else if (lm >= 30 && lm < 38)
+	{
+		lm = 3;
+	}
+	else if (lm >= 38 && lm < 50)
+	{
+		lm = 4;
+	}
+	else if (lm >= 50 && lm <= 60)
+	{
+		lm = 5;
+	}
+	else
+	{
+		lm = -1;
+	}
+
+
+
+
+
+	Serial.println("P" + String(fl) + "," + String(fc) + "," + String(fr) + "," + String(rf) + "," + String(rb)  + "," + String(lm) );
 	//SENSOR|17|15|17|30|20|20
 
 }
@@ -378,6 +429,8 @@ void setup()
 	//Checklist_Obstacle45(100);
 	//motor.ForwardChecklist(150);
 	//motor.Turn(1080);
+
+	for(int i = 0; i < 3; ++ i) motor.Forward10();
 }
 
 
@@ -410,41 +463,41 @@ void loop()
 			//WASD is for movement
 		case 'w':
 			motor.Forward10();
-			Serial.println('w');
+			Serial.println("PY");
 			break;
 		case 'W':
 			motor.Forward30();
-			Serial.println('W');
+			Serial.println("PY");
 			break;
 		case 'q':
 			motor.Forward50();
-			Serial.println('q');
+			Serial.println("PY");
 			break;
 		case 's': //Reverse
 			motor.Turn180();
-			Serial.println('s');
+			Serial.println("PY");
 			break;
 		case 'a': //Turn left 90
 			motor.TurnLeft90();
-			Serial.println('a');
+			Serial.println("PY");
 			break;
 		case 'd': //Turn right 90
 			motor.TurnRight90();
-			Serial.println('d');
+			Serial.println("PY");
 			break;
 
 			//TFGH is for calibration
 		case 't':
 			Calibrate_Forward(13);
-			Serial.println("Calibrate Forward");
+			Serial.println("PY");
 			break;
 		case 'g':
 			Calibrate_FrontAngle();
-			Serial.println("Calibrate Front Angle");
+			Serial.println("PY");
 			break;
 		case 'h':
 			Calibrate_SideAngle();
-			Serial.println("Calibrate Side Angle");
+			Serial.println("PY");
 			break;
 
 			//IJL are for sensor readings
@@ -452,6 +505,7 @@ void loop()
 			SendSensorValues();
 			break;
 		default:
+			Serial.println("Error");
 			break;
 		}
 	}

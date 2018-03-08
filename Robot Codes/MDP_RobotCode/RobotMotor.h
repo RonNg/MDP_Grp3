@@ -50,7 +50,7 @@ public:
 	double ComputePID(double consKp, double consKi, double consKd, char direction, double targetRPM, int motorNo);
 
 	void begin();
-	void CalcTicks();
+	void CalcRPM();
 
 	//Returns true when hit target tick
 	void CalibrationForward(int rpm);
