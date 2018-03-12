@@ -12,6 +12,7 @@
 #define PRATIO_RIGHT 3.23021 //1 power = 3.23 RPM for right motor
 
 
+
 /*
 	NEED TO RECALIBRATE FORWARD 10, ROTATE LEFT 90 AND ROTATE RIGHT 90 AND TURN 180
 */
@@ -66,20 +67,12 @@ public:
 	//Returns true when hit target tick
 	void CalibrationForward(double cm, bool reverse);
 	
-	void ForwardChecklist(int cm);
-	void Forward(double cm);
-	void Turn(double angle);
-
-
-
-	//Specially calibrated version of moving forward
 	void Forward10();
 	void Forward30();
 	void Forward50();
+	void Turn(double angle);
 
-	//Specially calibrated version of Left and right 45 degree turn
-	void TurnLeft45();
-	void TurnRight45();
+	//Specially calibrated version of moving forward
 
 	//Specially calibrated version of Left and right 90 degree turn.
 	void TurnRight90();

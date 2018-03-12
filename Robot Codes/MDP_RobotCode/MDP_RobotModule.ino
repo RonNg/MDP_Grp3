@@ -66,9 +66,10 @@ void Calibrate_FrontAngle()
 {
 	double leftSensor;
 	double rightSensor;
-	for (int i = 0; i < 4; ++i)
+	for (int i = 0; i < 2; ++i)
 	{
 		//Align both sensors forward first, regardless whether its far or near
+		delay(200); //Give sensors time to readjust
 		leftSensor = ir_FL.getDistance();
 		rightSensor = ir_FR.getDistance();
 
@@ -101,9 +102,17 @@ void Calibrate_FrontAngle()
 //Calibrates right side to align straight
 void Calibrate_SideAngle()
 {
+	/*=====================================
+	
+	
+		REMOVE THIS AFTER FIXING SIDE SENSORS
+
+	=========================================*/
+	return; 
+
 	double leftSensor;
 	double rightSensor;
-	for (int i = 0; i < 4; ++i)
+	for (int i = 0; i < 2; ++i)
 	{
 		//Align both sensors forward first, regardless whether its far or near
 		leftSensor = ir_SF.getDistance();
@@ -138,10 +147,10 @@ void Calibrate_SideAngle()
 }
 
 //Move forward until one sensor reads setPoint distance
-void Calibrate_Forward(int setPoint)
+void Calibrate_Forward(int setPoint = 12.3)
 {
 
-	for (int i = 0; i < 5; ++i)
+	for (int i = 0; i < 4; ++i)
 	{
 		double frontSensor = ir_FC.getDistance();
 
@@ -150,7 +159,7 @@ void Calibrate_Forward(int setPoint)
 		//If positive, it means that the robot is too far from the setpoint
 		double distance = frontSensor - setPoint;
 
-		if (abs(distance) <= 0.05)
+		if (abs(distance) <= 0.01)
 			break;
 
 		if (distance > 0) //Robot away from setpoint
@@ -168,14 +177,14 @@ void Calibrate_Forward(int setPoint)
 
 void Calibrate_Corner()
 {
-	Calibrate_Forward(12.5);
+	Calibrate_Forward();
 	Calibrate_FrontAngle();
 
 	//Turn left
 	motor.TurnRight90();
 
 	//Calibrate
-	Calibrate_Forward(12.5);
+	Calibrate_Forward();
 
 	Calibrate_FrontAngle();
 
@@ -189,7 +198,7 @@ void Calibrate_Side()
 {
 	motor.TurnRight90();
 	
-	Calibrate_Forward(12.5);
+	Calibrate_Forward();
 	Calibrate_FrontAngle();
 
 	motor.TurnLeft90();
@@ -197,17 +206,12 @@ void Calibrate_Side()
 	Calibrate_SideAngle();
 }
 
-void Calibrate_Front() 
-{
-	Calibrate_Forward(12.5);
-	Calibrate_FrontAngle();
-}
 
 void AutoCalibrate_ForwardDistance()
 {
 	if (NormalizeShortRange(ir_FC.getDistance()) == 1)
 	{
-		Calibrate_Forward(12.5);
+		Calibrate_Forward();
 	}
 }
 
@@ -215,14 +219,14 @@ void AutoCalibrate_ForwardAngle()
 {
 	if (NormalizeFrontSides(ir_FL.getDistance()) == 1 && NormalizeFrontSides(ir_FR.getDistance() == 1))
 	{
-		Calibrate_Front();
+		Calibrate_FrontAngle();
 	}
 }
 
 
 void AutoCalibrate_SideAngle()
 {
-	if (NormalizeSide(ir_SF.getDistance()) == 1 && NormalizeSide(ir_SB.getDistance() == 1))
+	if (NormalizeSide(ir_SF.getDistance()) == 1 && NormalizeSide(ir_SB.getDistance()) == 1)
 	{
 		Calibrate_SideAngle();
 	}
@@ -412,7 +416,7 @@ void RawSensorValues()
 {
 	delay(500); //Delay in reading senosr
 	double  fl = ir_FL.getDistance();
-	double fc = ir_FC.getDistance();
+	double  fc = ir_FC.getDistance();
 	double  fr = ir_FR.getDistance();
 
 	double lm = ir_LM.getDistance();
@@ -437,18 +441,20 @@ void setup()
 	enableInterrupt(M2B, m2Change, CHANGE);
 
 	motor.begin();
-	
-	//Checklist_Obstacle90(100);
-	//Checklist_Obstacle45(100);
-	//motor.ForwardChecklist(150);
-	//motor.Turn(1080);
 
-	//for(int i = 0; i < 3; ++ i) motor.Forward10();/
+	/*for (int i = 0; i < 3; ++i)
+	{
+		motor.Forward(10);
+	}*/
+
+	//Calibrate_Forward(12.5);
 }
 
 String commands;
 int currIndex = 0; //Current command index
 int commandLength = 0;
+bool canCalibrate = false;
+bool debugAutoCalibrate = true; //Set to false to disable auto calibration
 
 void loop()
 {
@@ -463,12 +469,12 @@ void loop()
 	}
 	else
 	{
-		if (commandLength > 0)
+		if (commandLength > 0 && canCalibrate && debugAutoCalibrate)
 		{	
-			AutoCalibrate_ForwardDistance();
 			AutoCalibrate_ForwardAngle();
-			AutoCalibrate_SideAngle();
-			
+			AutoCalibrate_ForwardDistance();
+			//AutoCalibrate_SideAngle();
+			canCalibrate = false;
 		}
 	}
 
@@ -482,6 +488,7 @@ void loop()
 	//Serial.println(currIndex);
 	while (currIndex < commandLength)
 	{
+		canCalibrate = true;
 		char command = commands[currIndex++]; //Get command from String by treating it as an array
 
 		switch (command)
@@ -492,11 +499,11 @@ void loop()
 			Serial.println("PY");
 			break;
 		case 'W':
-			motor.Forward(30);
+			motor.Forward30();
 			Serial.println("PY");
 			break;
 		case 'q':
-			motor.Forward(50);
+			motor.Forward50();
 			Serial.println("PY");
 			break;
 		case 's': //Reverse
@@ -513,8 +520,12 @@ void loop()
 			break;
 			//TFGH is for calibration
 		case 't':
-			Calibrate_Forward(12.5);
+			Calibrate_Forward();
 			Serial.println("PY");
+			break;
+		case 'f':
+			Calibrate_FrontAngle();
+			Serial.print("PY");
 			break;
 		case 'g':
 			Calibrate_Corner();
@@ -539,5 +550,4 @@ void loop()
 		}
 	}
 }
-
 
