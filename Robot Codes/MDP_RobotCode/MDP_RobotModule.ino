@@ -28,6 +28,12 @@ const int M1B = 5;
 const int M2A = 11;
 const int M2B = 13;
 
+
+double round2dp(double value)
+{
+	double rounded = (int)(value* 100 + .5);
+	return (double)rounded/ 100;
+}
 //Encoder rising edge tick++
 void m1Change()
 {
@@ -55,17 +61,12 @@ void RPMBenchtest()
 	motor.GetMotor().setBrakes(400, 400);
 }
 
-void CalibrationRPM()
-{
-	motor.CalibrationForward(80);
-}
-
 //Makes both sensors aligned with each other i.e. have both sensors measure same distance from the front
 void Calibrate_FrontAngle()
 {
 	double leftSensor;
 	double rightSensor;
-	for (int i = 0; i < 10; ++i)
+	for (int i = 0; i < 4; ++i)
 	{
 		//Align both sensors forward first, regardless whether its far or near
 		leftSensor = ir_FL.getDistance();
@@ -73,12 +74,11 @@ void Calibrate_FrontAngle()
 
 		double sensorDiff = abs(leftSensor - rightSensor);
 
-		if (sensorDiff <= 0.0)
+		if (sensorDiff <= 0.3)
 			break;
 
 		//Atan returns radian. Convert rad to deg by multiplying 180/PI
 		double angle = atan(sensorDiff / 14) * 180 / PI;
-
 
 		//Left is further
 		if (leftSensor > rightSensor)
@@ -103,7 +103,7 @@ void Calibrate_SideAngle()
 {
 	double leftSensor;
 	double rightSensor;
-	for (int i = 0; i < 10; ++i)
+	for (int i = 0; i < 4; ++i)
 	{
 		//Align both sensors forward first, regardless whether its far or near
 		leftSensor = ir_SF.getDistance();
@@ -111,7 +111,7 @@ void Calibrate_SideAngle()
 
 		double sensorDiff = abs(leftSensor - rightSensor);
 
-		if (sensorDiff <= 0.0)
+		if (sensorDiff <= 0.3)
 			break;
 
 		//Atan returns radian. Convert rad to deg by multiplying 180/PI
@@ -150,85 +150,85 @@ void Calibrate_Forward(int setPoint)
 		//If positive, it means that the robot is too far from the setpoint
 		double distance = frontSensor - setPoint;
 
-		if (distance == 0)
+		if (abs(distance) <= 0.05)
 			break;
 
 		if (distance > 0) //Robot away from setpoint
 		{
 			//Absolute distance must be passed in as a negative value will mess up the Forward function
 			//to indicate reverse instead, we pass true in the second argument
-			motor.Forward(abs(distance), false);
+			motor.CalibrationForward(abs(distance), false);
 		}
 		else if (distance < 0) //Robot too 
 		{
-			motor.Forward(abs(distance), true);
+			motor.CalibrationForward(abs(distance), true);
 		}
 	}
 }
 
-void Calibrate_Full(int setPoint)
+void Calibrate_Corner()
 {
-	//Calibrate_Angle(setPoint);
-
-	//while (!Calibrate_Forward(setPoint))
-	//{
-	//	Calibrate_Angle(setPoint);
-	//}
-
-}
-
-void CalibrationTest()
-{
+	Calibrate_Forward(12.5);
 	Calibrate_FrontAngle();
-	delay(100);
-
-	Calibrate_Forward(15);
-	delay(100);
-
-	//Turn left
-	motor.TurnLeft90();
-	delay(100);
-
-
-	//Calibrate
-	Calibrate_FrontAngle();
-	delay(100);
-
-	Calibrate_Forward(15);
-	delay(100);
-
 
 	//Turn left
 	motor.TurnRight90();
-	delay(100);
-
 
 	//Calibrate
-	Calibrate_FrontAngle();
-	delay(100);
+	Calibrate_Forward(12.5);
 
-	Calibrate_Forward(15);
-	delay(100);
+	Calibrate_FrontAngle();
 
 	//Turn left
 	motor.TurnLeft90();
-	delay(100);
-
-
-	//Calibrate
-	Calibrate_FrontAngle();
-	delay(100);
-
-	Calibrate_Forward(15);
-	delay(100);
-
-	motor.TurnLeft90();
-	delay(100);
 
 	Calibrate_SideAngle();
 }
 
-void Checklist_Obstacle90(int distance)
+void Calibrate_Side()
+{
+	motor.TurnRight90();
+	
+	Calibrate_Forward(12.5);
+	Calibrate_FrontAngle();
+
+	motor.TurnLeft90();
+
+	Calibrate_SideAngle();
+}
+
+void Calibrate_Front() 
+{
+	Calibrate_Forward(12.5);
+	Calibrate_FrontAngle();
+}
+
+void AutoCalibrate_ForwardDistance()
+{
+	if (NormalizeShortRange(ir_FC.getDistance()) == 1)
+	{
+		Calibrate_Forward(12.5);
+	}
+}
+
+void AutoCalibrate_ForwardAngle()
+{
+	if (NormalizeFrontSides(ir_FL.getDistance()) == 1 && NormalizeFrontSides(ir_FR.getDistance() == 1))
+	{
+		Calibrate_Front();
+	}
+}
+
+
+void AutoCalibrate_SideAngle()
+{
+	if (NormalizeSide(ir_SF.getDistance()) == 1 && NormalizeSide(ir_SB.getDistance() == 1))
+	{
+		Calibrate_SideAngle();
+	}
+}
+
+/*_Obstacle90(int distance)
 {
 	int travelled = ((distance) / 10);
 	travelled -= 5;
@@ -346,71 +346,84 @@ void Checklist_Obstacle45(int distance)
 
 
 }
+*/
 
-void SendSensorValues()
+int NormalizeShortRange(double shortSensor)
+{
+	if (shortSensor <= 15)
+	{
+		return 1;
+	}
+		return -1;
+}
+
+int NormalizeFrontSides(double sideFrontSensor)
+{
+	if (sideFrontSensor <= 14)
+	{
+		return 1;
+	}
+	return -1;
+
+}
+
+int NormalizeSide(double sideSensor)
+{
+	if (sideSensor <= 15.5)
+	{
+		return 1;
+	}
+
+	return -1;
+}
+
+int NormalizeLong(double longSensor)
+{
+	//if(longSensor <
+	if (longSensor < 23.5)
+	{
+		return 1;
+	}
+	return -1;
+}
+
+
+void GridSensorValues()
 {
 	delay(500); //Delay in reading senosr
-	int fl = ir_FL.getDistance();
-	int fc = ir_FC.getDistance();
-	int fr = ir_FR.getDistance();
+	int fl = NormalizeFrontSides(ir_FL.getDistance());
+	int fc = NormalizeShortRange(ir_FC.getDistance());
+	int fr = NormalizeFrontSides(ir_FR.getDistance());
 
-	int lm = ir_LM.getDistance();
-	int rf = ir_SF.getDistance();
-	int rb = ir_SB.getDistance();
-
-	//Short range
+	int lm = NormalizeLong(ir_LM.getDistance());
 	
-	if (fc <= 18)
-	{
-		fc = 1;
-	}
-	else if (fc >= 18 && fc < 25)
-	{
-		fc = 2;
-	}
-	else if (fc >= 25 && fc < 32)
-	{
-		fc = 3;
-	}
-	else
-	{
-		fc = -1;
-	} 
+	int rf = NormalizeSide(ir_SF.getDistance());
+	int rb = NormalizeSide(ir_SB.getDistance());
 
-
-	//Long range
-	if (lm <= 19)
-	{
-		lm = 1;
-	}
-	else if (lm > 19 && lm < 30)
-	{
-		lm = 2;
-	}
-	else if (lm >= 30 && lm < 38)
-	{
-		lm = 3;
-	}
-	else if (lm >= 38 && lm < 50)
-	{
-		lm = 4;
-	}
-	else if (lm >= 50 && lm <= 60)
-	{
-		lm = 5;
-	}
-	else
-	{
-		lm = -1;
-	}
-
-
-
-
+	//int rf = ir_SF.getDistance();
+	//int rb = ir_SB.getDistance();
 
 	Serial.println("P" + String(fl) + "," + String(fc) + "," + String(fr) + "," + String(rf) + "," + String(rb)  + "," + String(lm) );
 	//SENSOR|17|15|17|30|20|20
 
+}
+
+void RawSensorValues()
+{
+	delay(500); //Delay in reading senosr
+	double  fl = ir_FL.getDistance();
+	double fc = ir_FC.getDistance();
+	double  fr = ir_FR.getDistance();
+
+	double lm = ir_LM.getDistance();
+
+	double rf = ir_SF.getDistance();
+	double rb = ir_SB.getDistance();
+
+
+
+	Serial.println("P" + String(fl) + "," + String(fc) + "," + String(fr) + "," + String(rf) + "," + String(rb) + "," + String(lm));
+	//SENSOR|17|15|17|30|20|20
 }
 
 void setup()
@@ -430,9 +443,8 @@ void setup()
 	//motor.ForwardChecklist(150);
 	//motor.Turn(1080);
 
-	for(int i = 0; i < 3; ++ i) motor.Forward10();
+	//for(int i = 0; i < 3; ++ i) motor.Forward10();/
 }
-
 
 String commands;
 int currIndex = 0; //Current command index
@@ -440,22 +452,36 @@ int commandLength = 0;
 
 void loop()
 {
+
 	if (Serial.available()) //Checks how many bytes available. sizeof(char) = 1 byte
 	{
 		while (Serial.available() > 0)
 		{
 			char temp = Serial.read();
 			commands += temp; //Adds the character into the string
-
+		}
+	}
+	else
+	{
+		if (commandLength > 0)
+		{	
+			AutoCalibrate_ForwardDistance();
+			AutoCalibrate_ForwardAngle();
+			AutoCalibrate_SideAngle();
+			
 		}
 	}
 
+	//Impt to remove these characters else string length will be wrong
+	commands.replace("\n", ""); //Removes newline characters when pressing enter
+	commands.replace("\r", ""); //Removes return characters when pressing enter
+
 	for (commandLength = 0; commands[commandLength] != '\0'; ++commandLength);
+	//commandLength is array size
 
-
+	//Serial.println(currIndex);
 	while (currIndex < commandLength)
 	{
-
 		char command = commands[currIndex++]; //Get command from String by treating it as an array
 
 		switch (command)
@@ -466,11 +492,11 @@ void loop()
 			Serial.println("PY");
 			break;
 		case 'W':
-			motor.Forward30();
+			motor.Forward(30);
 			Serial.println("PY");
 			break;
 		case 'q':
-			motor.Forward50();
+			motor.Forward(50);
 			Serial.println("PY");
 			break;
 		case 's': //Reverse
@@ -485,24 +511,27 @@ void loop()
 			motor.TurnRight90();
 			Serial.println("PY");
 			break;
-
 			//TFGH is for calibration
 		case 't':
-			Calibrate_Forward(13);
+			Calibrate_Forward(12.5);
 			Serial.println("PY");
 			break;
 		case 'g':
-			Calibrate_FrontAngle();
+			Calibrate_Corner();
 			Serial.println("PY");
 			break;
 		case 'h':
-			Calibrate_SideAngle();
+			Calibrate_Side();
 			Serial.println("PY");
 			break;
 
 			//IJL are for sensor readings
 		case 'k':
-			SendSensorValues();
+			GridSensorValues();
+			break;
+
+		case 'l':
+			RawSensorValues();
 			break;
 		default:
 			Serial.println("Error");

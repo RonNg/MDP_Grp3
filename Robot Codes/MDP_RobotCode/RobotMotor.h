@@ -12,6 +12,10 @@
 #define PRATIO_RIGHT 3.23021 //1 power = 3.23 RPM for right motor
 
 
+/*
+	NEED TO RECALIBRATE FORWARD 10, ROTATE LEFT 90 AND ROTATE RIGHT 90 AND TURN 180
+*/
+
 class RobotMotor
 {
 private:
@@ -41,6 +45,13 @@ public:
 	inline void M1Change() { m1Ticks++; m1TargetCounter++; }
 	inline void M2Change() { m2Ticks++; m2TargetCounter++; }
 	inline void ResetPID() { errSum = 0; lastErr = 0; }
+	inline int getM1Tick() {
+		return m1Ticks;
+	}
+
+	inline int getM2Tick() {
+		return m2Ticks;
+	}
 	
 	inline DualVNH5019MotorShield GetMotor() {	return md; }
 	
@@ -53,10 +64,10 @@ public:
 	void CalcRPM();
 
 	//Returns true when hit target tick
-	void CalibrationForward(int rpm);
+	void CalibrationForward(double cm, bool reverse);
 	
 	void ForwardChecklist(int cm);
-	void Forward(double cm, bool reverse);
+	void Forward(double cm);
 	void Turn(double angle);
 
 
