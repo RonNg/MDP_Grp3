@@ -206,7 +206,7 @@ void AutoCalibrate_ForwardDistance()
 
 void AutoCalibrate_ForwardAngle()
 {
-	if (NormalizeFrontSides(ir_FL.getDistance()) == 1 && NormalizeFrontSides(ir_FR.getDistance()) == 1)
+	if (NormalizeFrontLeft(ir_FL.getDistance()) == 1 && NormalizeFrontRight(ir_FR.getDistance()) == 1)
 	{
 		Calibrate_FrontAngle();
 	}
@@ -215,7 +215,7 @@ void AutoCalibrate_ForwardAngle()
 
 void AutoCalibrate_SideAngle()
 {
-	if (NormalizeSide(ir_SF.getDistance()) == 1 && NormalizeSide(ir_SB.getDistance()) == 1)
+	if (NormalizeFrontSide(ir_SF.getDistance()) == 1 && NormalizeBackSide(ir_SB.getDistance()) == 1)
 	{
 		Calibrate_SideAngle();
 	}
@@ -344,56 +344,89 @@ void Checklist_Obstacle45(int distance)
 int NormalizeShortRange(double shortSensor)
 {	
 	int dist = -1;
-	if (shortSensor > 24 && shortSensor <= 34)
-	{
-		dist = 3;
-	}
-
+	
 	if (shortSensor > 15 && shortSensor <= 24)
 	{
 		dist = 2;
 	}
-
-	if (shortSensor <= 15)
+	else if (shortSensor <= 15)
 	{
 		dist = 1;
 	}
 		return dist;
 }
 
-int NormalizeFrontSides(double sideFrontSensor)
+int NormalizeFrontLeft(double frontLeftSensor)
 {
-	if (sideFrontSensor <= 14)
+	int dist = -1;
+	
+	if (frontLeftSensor > 14 && frontLeftSensor <= 24.68)
 	{
-		return 1;
+		dist = 2;
 	}
-	return -1;
-
+	else if (frontLeftSensor <= 14)
+	{
+		dist = 1;
+	}
+	return dist;
 }
 
-int NormalizeSide(double sideSensor)
+int NormalizeFrontRight(double rightFrontSensor)
 {
-	if (sideSensor <= 15.5)
+	int dist = -1;
+	if (rightFrontSensor > 14 && rightFrontSensor <= 23.5)
 	{
-		return 1;
+		dist = 2;
+	}
+	else if (rightFrontSensor <= 14)
+	{
+		dist = 1;
+	}
+	return dist;
+}
+
+int NormalizeFrontSide(double frontSideSensor)
+{
+	int dist = -1;
+
+	if (frontSideSensor > 15.5 && frontSideSensor <= 28.05)
+	{
+		dist = 2;
+	}
+	else if (frontSideSensor <= 15.5)
+	{
+		dist = 1;
 	}
 
-	return -1;
+	return dist;
+}
+
+
+int NormalizeBackSide(double backSideSensor)
+{
+	int dist = -1;
+
+	if (backSideSensor> 15.5 && backSideSensor <= 28.05)
+	{
+		dist = 2;
+	}
+	else if (backSideSensor <= 15.5)
+	{
+		dist = 1;
+	}
+
+	return dist;
 }
 
 int NormalizeLong(double longSensor)
 {
 	int dist = -1;
 
-	if (longSensor > 52.8 && 63)
-	{
-		dist = 5;
-	}
-	else if (longSensor > 41 && longSensor <= 52.8)
+	if (longSensor > 41.8 && longSensor <= 52.8)
 	{
 		dist = 4;
 	}
-	else if (longSensor > 31.6 && longSensor <= 41)
+	else if (longSensor > 31.6 && longSensor <= 41.8)
 	{
 		dist = 3;
 	}
@@ -409,18 +442,17 @@ int NormalizeLong(double longSensor)
 	return dist;
 }
 
-
 void GridSensorValues()
 {
-	//delay(500); //Delay in reading senosr
-	int fl = NormalizeFrontSides(ir_FL.getDistance());
+	//delay(100); //Delay in reading senosr
+	int fl = NormalizeFrontLeft(ir_FL.getDistance());
 	int fc = NormalizeShortRange(ir_FC.getDistance());
-	int fr = NormalizeFrontSides(ir_FR.getDistance());
+	int fr = NormalizeFrontRight(ir_FR.getDistance());
 
 	int lm = NormalizeLong(ir_LM.getDistance());
 	
-	int rf = NormalizeSide(ir_SF.getDistance());
-	int rb = NormalizeSide(ir_SB.getDistance());
+	int rf = NormalizeFrontSide(ir_SF.getDistance());
+	int rb = NormalizeBackSide(ir_SB.getDistance());
 
 	//int rf = ir_SF.getDistance();
 	//int rb = ir_SB.getDistance();
@@ -476,7 +508,6 @@ bool debugAutoCalibrate = false; //Set to false to disable auto calibration
 
 void loop()
 {
-
 	if (Serial.available()) //Checks how many bytes available. sizeof(char) = 1 byte
 	{
 		while (Serial.available() > 0)
