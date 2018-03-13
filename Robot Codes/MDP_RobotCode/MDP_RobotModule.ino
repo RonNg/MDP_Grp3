@@ -69,13 +69,12 @@ void Calibrate_FrontAngle()
 	for (int i = 0; i < 2; ++i)
 	{
 		//Align both sensors forward first, regardless whether its far or near
-		delay(200); //Give sensors time to readjust
 		leftSensor = ir_FL.getDistance();
 		rightSensor = ir_FR.getDistance();
 
 		double sensorDiff = abs(leftSensor - rightSensor);
 
-		if (sensorDiff <= 0.3)
+		if (sensorDiff <= 0.01)
 			break;
 
 		//Atan returns radian. Convert rad to deg by multiplying 180/PI
@@ -102,14 +101,6 @@ void Calibrate_FrontAngle()
 //Calibrates right side to align straight
 void Calibrate_SideAngle()
 {
-	/*=====================================
-	
-	
-		REMOVE THIS AFTER FIXING SIDE SENSORS
-
-	=========================================*/
-	return; 
-
 	double leftSensor;
 	double rightSensor;
 	for (int i = 0; i < 2; ++i)
@@ -120,7 +111,7 @@ void Calibrate_SideAngle()
 
 		double sensorDiff = abs(leftSensor - rightSensor);
 
-		if (sensorDiff <= 0.3)
+		if (sensorDiff <= 0.01)
 			break;
 
 		//Atan returns radian. Convert rad to deg by multiplying 180/PI
@@ -143,11 +134,10 @@ void Calibrate_SideAngle()
 		}
 	}
 
-	delay(200);
 }
 
 //Move forward until one sensor reads setPoint distance
-void Calibrate_Forward(int setPoint = 12.3)
+void Calibrate_Forward(int setPoint = 11.8)
 {
 
 	for (int i = 0; i < 4; ++i)
@@ -159,7 +149,7 @@ void Calibrate_Forward(int setPoint = 12.3)
 		//If positive, it means that the robot is too far from the setpoint
 		double distance = frontSensor - setPoint;
 
-		if (abs(distance) <= 0.01)
+		if (abs(distance) <= 0.005)
 			break;
 
 		if (distance > 0) //Robot away from setpoint
@@ -185,7 +175,6 @@ void Calibrate_Corner()
 
 	//Calibrate
 	Calibrate_Forward();
-
 	Calibrate_FrontAngle();
 
 	//Turn left
@@ -217,7 +206,7 @@ void AutoCalibrate_ForwardDistance()
 
 void AutoCalibrate_ForwardAngle()
 {
-	if (NormalizeFrontSides(ir_FL.getDistance()) == 1 && NormalizeFrontSides(ir_FR.getDistance() == 1))
+	if (NormalizeFrontSides(ir_FL.getDistance()) == 1 && NormalizeFrontSides(ir_FR.getDistance()) == 1)
 	{
 		Calibrate_FrontAngle();
 	}
@@ -394,7 +383,7 @@ int NormalizeLong(double longSensor)
 
 void GridSensorValues()
 {
-	delay(500); //Delay in reading senosr
+	//delay(500); //Delay in reading senosr
 	int fl = NormalizeFrontSides(ir_FL.getDistance());
 	int fc = NormalizeShortRange(ir_FC.getDistance());
 	int fr = NormalizeFrontSides(ir_FR.getDistance());
@@ -414,7 +403,7 @@ void GridSensorValues()
 
 void RawSensorValues()
 {
-	delay(500); //Delay in reading senosr
+	//delay(500); //Delay in reading senosr
 	double  fl = ir_FL.getDistance();
 	double  fc = ir_FC.getDistance();
 	double  fr = ir_FR.getDistance();
@@ -473,7 +462,7 @@ void loop()
 		{	
 			AutoCalibrate_ForwardAngle();
 			AutoCalibrate_ForwardDistance();
-			//AutoCalibrate_SideAngle();
+			AutoCalibrate_SideAngle();
 			canCalibrate = false;
 		}
 	}
@@ -500,6 +489,7 @@ void loop()
 			break;
 		case 'W':
 			motor.Forward30();
+			AutoCalibrate_ForwardDistance();
 			Serial.println("PY");
 			break;
 		case 'q':
