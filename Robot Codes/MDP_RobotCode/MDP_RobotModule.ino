@@ -342,12 +342,23 @@ void Checklist_Obstacle45(int distance)
 */
 
 int NormalizeShortRange(double shortSensor)
-{
+{	
+	int dist = -1;
+	if (shortSensor > 24 && shortSensor <= 34)
+	{
+		dist = 3;
+	}
+
+	if (shortSensor > 15 && shortSensor <= 24)
+	{
+		dist = 2;
+	}
+
 	if (shortSensor <= 15)
 	{
-		return 1;
+		dist = 1;
 	}
-		return -1;
+		return dist;
 }
 
 int NormalizeFrontSides(double sideFrontSensor)
@@ -372,12 +383,30 @@ int NormalizeSide(double sideSensor)
 
 int NormalizeLong(double longSensor)
 {
-	//if(longSensor <
-	if (longSensor < 23.5)
+	int dist = -1;
+
+	if (longSensor > 52.8 && 63)
 	{
-		return 1;
+		dist = 5;
 	}
-	return -1;
+	else if (longSensor > 41 && longSensor <= 52.8)
+	{
+		dist = 4;
+	}
+	else if (longSensor > 31.6 && longSensor <= 41)
+	{
+		dist = 3;
+	}
+	else if (longSensor > 23.5 && longSensor <= 31.6)
+	{
+		dist = 2;
+	}
+
+	else if (longSensor <= 23.5)
+	{
+		dist = 1;
+	}
+	return dist;
 }
 
 
@@ -443,7 +472,7 @@ String commands;
 int currIndex = 0; //Current command index
 int commandLength = 0;
 bool canCalibrate = false;
-bool debugAutoCalibrate = true; //Set to false to disable auto calibration
+bool debugAutoCalibrate = false; //Set to false to disable auto calibration
 
 void loop()
 {
