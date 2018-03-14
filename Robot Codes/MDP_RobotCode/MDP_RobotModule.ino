@@ -28,7 +28,6 @@ const int M1B = 5;
 const int M2A = 11;
 const int M2B = 13;
 
-
 double round2dp(double value)
 {
 	double rounded = (int)(value* 100 + .5);
@@ -66,7 +65,7 @@ void Calibrate_FrontAngle()
 {
 	double leftSensor;
 	double rightSensor;
-	for (int i = 0; i < 2; ++i)
+	for (int i = 0; i < 1; ++i)
 	{
 		//Align both sensors forward first, regardless whether its far or near
 		leftSensor = ir_FL.getDistance();
@@ -103,7 +102,7 @@ void Calibrate_SideAngle()
 {
 	double leftSensor;
 	double rightSensor;
-	for (int i = 0; i < 2; ++i)
+	for (int i = 0; i < 1; ++i)
 	{
 		//Align both sensors forward first, regardless whether its far or near
 		leftSensor = ir_SF.getDistance();
@@ -137,7 +136,7 @@ void Calibrate_SideAngle()
 }
 
 //Move forward until one sensor reads setPoint distance
-void Calibrate_Forward(int setPoint = 11.8)
+void Calibrate_Forward(int setPoint = 11)
 {
 
 	for (int i = 0; i < 4; ++i)
@@ -149,7 +148,7 @@ void Calibrate_Forward(int setPoint = 11.8)
 		//If positive, it means that the robot is too far from the setpoint
 		double distance = frontSensor - setPoint;
 
-		if (abs(distance) <= 0.005)
+		if (abs(distance) <= 0.0)
 			break;
 
 		if (distance > 0) //Robot away from setpoint
@@ -345,7 +344,7 @@ int NormalizeShortRange(double shortSensor)
 {	
 	int dist = -1;
 	
-	if (shortSensor > 15 && shortSensor <= 24)
+	if (shortSensor > 15 && shortSensor <= 23.9)
 	{
 		dist = 2;
 	}
@@ -360,7 +359,7 @@ int NormalizeFrontLeft(double frontLeftSensor)
 {
 	int dist = -1;
 	
-	if (frontLeftSensor > 14 && frontLeftSensor <= 24.68)
+	if (frontLeftSensor > 14 && frontLeftSensor <= 24)
 	{
 		dist = 2;
 	}
@@ -374,7 +373,7 @@ int NormalizeFrontLeft(double frontLeftSensor)
 int NormalizeFrontRight(double rightFrontSensor)
 {
 	int dist = -1;
-	if (rightFrontSensor > 14 && rightFrontSensor <= 23.5)
+	if (rightFrontSensor > 14 && rightFrontSensor <= 22.9)	
 	{
 		dist = 2;
 	}
@@ -389,7 +388,7 @@ int NormalizeFrontSide(double frontSideSensor)
 {
 	int dist = -1;
 
-	if (frontSideSensor > 15.5 && frontSideSensor <= 28.05)
+	if (frontSideSensor > 15.5 && frontSideSensor <= 26)
 	{
 		dist = 2;
 	}
@@ -401,12 +400,11 @@ int NormalizeFrontSide(double frontSideSensor)
 	return dist;
 }
 
-
 int NormalizeBackSide(double backSideSensor)
 {
 	int dist = -1;
 
-	if (backSideSensor> 15.5 && backSideSensor <= 28.05)
+	if (backSideSensor > 15.5 && backSideSensor <= 26)
 	{
 		dist = 2;
 	}
@@ -422,15 +420,15 @@ int NormalizeLong(double longSensor)
 {
 	int dist = -1;
 
-	if (longSensor > 41.8 && longSensor <= 52.8)
+	if (longSensor > 42 && longSensor <= 51.4)
 	{
 		dist = 4;
 	}
-	else if (longSensor > 31.6 && longSensor <= 41.8)
+	else if (longSensor > 32.0 && longSensor <= 42)
 	{
 		dist = 3;
 	}
-	else if (longSensor > 23.5 && longSensor <= 31.6)
+	else if (longSensor > 23.5 && longSensor <= 32.0)
 	{
 		dist = 2;
 	}
@@ -480,6 +478,7 @@ void RawSensorValues()
 	//SENSOR|17|15|17|30|20|20
 }
 
+
 void setup()
 {
 	Serial.begin(9600);
@@ -504,7 +503,14 @@ String commands;
 int currIndex = 0; //Current command index
 int commandLength = 0;
 bool canCalibrate = false;
-bool debugAutoCalibrate = false; //Set to false to disable auto calibration
+bool debugAutoCalibrate = true; //Set to false to disable auto calibration
+
+void FlushBuffer()
+{
+	commands.replace(commands, "");
+	commandLength = 0;
+	currIndex = 0;
+}
 
 void loop()
 {
@@ -585,12 +591,14 @@ void loop()
 			Calibrate_Side();
 			Serial.println("PY");
 			break;
-
+		case 'o':
+			FlushBuffer();
+			Serial.println("PY");
+			break;
 			//IJL are for sensor readings
 		case 'k':
 			GridSensorValues();
 			break;
-
 		case 'l':
 			RawSensorValues();
 			break;
