@@ -136,10 +136,10 @@ void Calibrate_SideAngle()
 }
 
 //Move forward until one sensor reads setPoint distance
-void Calibrate_Forward(int setPoint = 11)
+void Calibrate_Forward(int setPoint = 11.3)
 {
 
-	for (int i = 0; i < 4; ++i)
+	for (int i = 0; i < 2; ++i)
 	{
 		double frontSensor = ir_FC.getDistance();
 
@@ -148,7 +148,7 @@ void Calibrate_Forward(int setPoint = 11)
 		//If positive, it means that the robot is too far from the setpoint
 		double distance = frontSensor - setPoint;
 
-		if (abs(distance) <= 0.0)
+		if (abs(distance) <= 0.5)
 			break;
 
 		if (distance > 0) //Robot away from setpoint
@@ -194,7 +194,6 @@ void Calibrate_Side()
 	Calibrate_SideAngle();
 }
 
-
 void AutoCalibrate_ForwardDistance()
 {
 	if (NormalizeShortRange(ir_FC.getDistance()) == 1)
@@ -210,7 +209,6 @@ void AutoCalibrate_ForwardAngle()
 		Calibrate_FrontAngle();
 	}
 }
-
 
 void AutoCalibrate_SideAngle()
 {
@@ -344,11 +342,11 @@ int NormalizeShortRange(double shortSensor)
 {	
 	int dist = -1;
 	
-	if (shortSensor > 15 && shortSensor <= 23.9)
+	/*if (shortSensor > 15 && shortSensor <= 23.9)
 	{
 		dist = 2;
 	}
-	else if (shortSensor <= 15)
+	else */if (shortSensor <= 15)
 	{
 		dist = 1;
 	}
@@ -359,11 +357,11 @@ int NormalizeFrontLeft(double frontLeftSensor)
 {
 	int dist = -1;
 	
-	if (frontLeftSensor > 14 && frontLeftSensor <= 24)
+	/*if (frontLeftSensor > 14 && frontLeftSensor <= 24)
 	{
 		dist = 2;
 	}
-	else if (frontLeftSensor <= 14)
+	else */if (frontLeftSensor <= 14)
 	{
 		dist = 1;
 	}
@@ -373,11 +371,11 @@ int NormalizeFrontLeft(double frontLeftSensor)
 int NormalizeFrontRight(double rightFrontSensor)
 {
 	int dist = -1;
-	if (rightFrontSensor > 14 && rightFrontSensor <= 22.9)	
+	/*if (rightFrontSensor > 14 && rightFrontSensor <= 22.9)	
 	{
 		dist = 2;
 	}
-	else if (rightFrontSensor <= 14)
+	else */if (rightFrontSensor <= 14)
 	{
 		dist = 1;
 	}
@@ -388,11 +386,11 @@ int NormalizeFrontSide(double frontSideSensor)
 {
 	int dist = -1;
 
-	if (frontSideSensor > 15.5 && frontSideSensor <= 26)
+	/*if (frontSideSensor > 15.5 && frontSideSensor <= 26)
 	{
 		dist = 2;
 	}
-	else if (frontSideSensor <= 15.5)
+	else*/ if (frontSideSensor <= 15.5)
 	{
 		dist = 1;
 	}
@@ -404,11 +402,11 @@ int NormalizeBackSide(double backSideSensor)
 {
 	int dist = -1;
 
-	if (backSideSensor > 15.5 && backSideSensor <= 26)
+	/*if (backSideSensor > 15.5 && backSideSensor <= 26)
 	{
 		dist = 2;
 	}
-	else if (backSideSensor <= 15.5)
+	else */if (backSideSensor <= 15.5)
 	{
 		dist = 1;
 	}
@@ -504,6 +502,7 @@ int currIndex = 0; //Current command index
 int commandLength = 0;
 bool canCalibrate = false;
 bool debugAutoCalibrate = true; //Set to false to disable auto calibration
+bool exploration = true;
 
 void FlushBuffer()
 {
@@ -525,7 +524,7 @@ void loop()
 	else
 	{
 		if (commandLength > 0 && canCalibrate && debugAutoCalibrate)
-		{	
+		{
 			AutoCalibrate_ForwardAngle();
 			AutoCalibrate_ForwardDistance();
 			AutoCalibrate_SideAngle();
@@ -539,6 +538,15 @@ void loop()
 
 	for (commandLength = 0; commands[commandLength] != '\0'; ++commandLength);
 	//commandLength is array size
+
+	if ((commandLength - 1) - currIndex >= 2) //Total commands sent is more than 2 i.e. fastest path
+	{
+		exploration = false;
+	}
+	else
+	{
+		exploration = true;
+	}
 
 	//Serial.println(currIndex);
 	while (currIndex < commandLength)
@@ -605,6 +613,13 @@ void loop()
 		default:
 			Serial.println("Error");
 			break;
+		}
+
+		if (!exploration)
+		{
+			AutoCalibrate_ForwardAngle();
+			AutoCalibrate_ForwardDistance();
+			AutoCalibrate_SideAngle();
 		}
 	}
 }
