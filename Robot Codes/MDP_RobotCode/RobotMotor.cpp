@@ -69,12 +69,12 @@ void RobotMotor::CalibrationForward(double  cm, bool reverse)
 	md.setSpeeds(m1Power, m2Power);
 	md.setBrakes(0, 0);
 
-	while (m1TargetCounter < targetTick || m2TargetCounter < targetTick)
+	while (m1TargetCounter < targetTick - 20 || m2TargetCounter < targetTick - 20)
 	{
 		CalcRPM();
 		/*m1Power += ComputePID(0.000475, 0, 0.005, 'f', 100, MOTOR_LEFT);
 		m2Power += ComputePID(0.00051, 0, 0.003, 'f', 100, MOTOR_RIGHT);*/
-		m1Power += ComputePID(0.00046, 0, 0.005, 'f', 100, MOTOR_LEFT);
+		m1Power += ComputePID(0.00048, 0, 0.005, 'f', 100, MOTOR_LEFT);
 		m2Power += ComputePID(0.000525, 0, 0.005, 'f', 100, MOTOR_RIGHT);
 
 		if (m1Power < 0)
@@ -116,8 +116,8 @@ void RobotMotor::Forward10()
 		CalcRPM();
 		/*m1Power += ComputePID(0.000475, 0, 0.005, 'f', 100, MOTOR_LEFT);
 		m2Power += ComputePID(0.00051, 0, 0.003, 'f', 100, MOTOR_RIGHT);*/
-		m1Power += ComputePID(0.000495, 0, 0.005, 'f', 100, MOTOR_LEFT);
-		m2Power += ComputePID(0.000545, 0, 0.003, 'f', 100, MOTOR_RIGHT);
+		m1Power += ComputePID(0.000485, 0, 0.005, 'f', 100, MOTOR_LEFT);
+		m2Power += ComputePID(0.000535, 0, 0.003, 'f', 100, MOTOR_RIGHT);
 
 		if (m1Power < 0)
 			m1Power = 0;
@@ -127,7 +127,7 @@ void RobotMotor::Forward10()
 
 		md.setSpeeds(m1Power, m2Power);
 	}
-
+	
 	md.setSpeeds(0, 0);
 	md.setBrakes(400, 395);
 
@@ -143,7 +143,7 @@ void RobotMotor::Forward30()
 
 	ResetPID();
 
-	//Initial speed
+	//Initial speedeebn1232213
 	m1Power = m2Power = 250;
 
 	md.setSpeeds(m1Power, m2Power);
@@ -152,8 +152,8 @@ void RobotMotor::Forward30()
 	while (m1TargetCounter < targetTick - 200 || m2TargetCounter < targetTick - 200)
 	{
 		CalcRPM();
-		m1Power += ComputePID(0.000495, 0, 0.005, 'f', 100, MOTOR_LEFT);
-		m2Power += ComputePID(0.000545, 0, 0.005, 'f', 100, MOTOR_RIGHT);
+		m1Power += ComputePID(0.000485, 0, 0.005, 'f', 100, MOTOR_LEFT);
+		m2Power += ComputePID(0.000535, 0, 0.005, 'f', 100, MOTOR_RIGHT);
 
 		if (m1Power < 0)
 			m1Power = 0;
@@ -188,7 +188,7 @@ void RobotMotor::Forward50()
 	{
 		CalcRPM();
 		m1Power += ComputePID(0.000485, 0, 0.005, 'f', 100, MOTOR_LEFT);
-		m2Power += ComputePID(0.000535, 0, 0.005, 'f', 100, MOTOR_RIGHT);
+		m2Power += ComputePID(0.000525, 0, 0.005, 'f', 100, MOTOR_RIGHT);
 
 		if (m1Power < 0)
 			m1Power = 0;
@@ -262,7 +262,7 @@ void RobotMotor::TurnLeft90()
 	{
 		CalcRPM();
 
-		m1Power += ComputePID(0.00045, 0, 0.0005, 'f', 100, MOTOR_LEFT);
+		m1Power += ComputePID(0.000453, 0, 0.0005, 'f', 100, MOTOR_LEFT);
 		m2Power += ComputePID(0.000485, 0, 0.0005, 'f', 100, MOTOR_RIGHT);
 
 		md.setSpeeds(-m1Power, m2Power);
@@ -292,12 +292,12 @@ void RobotMotor::TurnRight90()
 	md.setSpeeds(m1Power, -m2Power);
 	md.setBrakes(0, 0);
 
-	while (m1TargetCounter < targetTick - 130 || m2TargetCounter < targetTick - 145)
+	while (m1TargetCounter < targetTick - 140 || m2TargetCounter < targetTick - 145)
 	{
 		CalcRPM();
 
 		m1Power += ComputePID(0.00045, 0, 0.0005, 'f', 100, MOTOR_LEFT);
-		m2Power += ComputePID(0.000475, 0, 0.0005, 'f', 100, MOTOR_RIGHT);
+		m2Power += ComputePID(0.000465, 0, 0.0005, 'f', 100, MOTOR_RIGHT);
 
 		md.setSpeeds(m1Power, -m2Power);
 
