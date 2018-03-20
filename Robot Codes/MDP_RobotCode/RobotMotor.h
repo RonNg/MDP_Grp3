@@ -1,7 +1,7 @@
 #pragma once
 #include <DualVNH5019MotorShield.h>
 
-#define TICK_REFRESH_INTERVAL 500//ms
+#define TICK_REFRESH_INTERVAL 200//ms
 #define TICKS_PER_CM 118
 #define TICKS_PER_REV 2248.86
 
@@ -59,7 +59,7 @@ public:
 	//Char dir is for forward and backward
 	//motorNo 1 for Left Motor, 2 for Right Motor
 	//
-	double ComputePID(double consKp, double consKi, double consKd, char direction, double targetRPM, int motorNo);
+	double ComputePID(double consKp, double consKi, double consKd, double targetRPM, int motor);
 
 	void begin();
 	void CalcRPM();
@@ -67,6 +67,7 @@ public:
 	//Returns true when hit target tick
 	void CalibrationForward(double cm, bool reverse);
 	
+	void Forward(double cm);
 	void Forward10();
 	void Forward30();
 	void Forward50();

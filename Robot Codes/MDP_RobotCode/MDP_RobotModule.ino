@@ -28,11 +28,6 @@ const int M1B = 5;
 const int M2A = 11;
 const int M2B = 13;
 
-double round2dp(double value)
-{
-	double rounded = (int)(value* 100 + .5);
-	return (double)rounded/ 100;
-}
 //Encoder rising edge tick++
 void m1Change()
 {
@@ -42,22 +37,6 @@ void m1Change()
 void m2Change()
 {
 	motor.M2Change();
-}
-
-void RPMBenchtest()
-{
-	int setSpeed = 200;
-	for (int i = 0; i < 6; ++i)
-	{
-		motor.GetMotor().setSpeeds(setSpeed, setSpeed);
-		delay(1005);
-
-		motor.CalcRPM();
-		motor.GetMotor().setBrakes(400, 400);
-		delay(1005);
-	}
-
-	motor.GetMotor().setBrakes(400, 400);
 }
 
 //Makes both sensors aligned with each other i.e. have both sensors measure same distance from the front
@@ -178,6 +157,7 @@ void Calibrate_Corner()
 
 	//Turn left
 	motor.TurnLeft90();
+	Calibrate_Forward();
 
 	Calibrate_SideAngle();
 }
@@ -217,126 +197,6 @@ void AutoCalibrate_SideAngle()
 		Calibrate_SideAngle();
 	}
 }
-
-/*_Obstacle90(int distance)
-{
-	int travelled = ((distance) / 10);
-	travelled -= 5;
-
-	CalibrationTest();
-
-	while (ir_FC.getDistance() > 15)
-	{
-		motor.Forward10();
-		--travelled;
-	}
-
-
-
-	//Obstacle Avoidance Start
-	Calibrate_SideAngle();
-	Calibrate_Forward(15);
-
-	motor.Forward10();
-
-	motor.TurnLeft90();
-
-	motor.Forward10();
-
-	motor.Forward10();
-
-	motor.TurnRight90();
-	//Calibrate_SideAngle();
-
-
-	for (int i = 0; i < 4; ++i)
-	{
-		motor.Forward10();
-	}
-
-	motor.TurnRight90();
-
-
-	motor.Forward10();
-
-	motor.Forward10();
-
-	Calibrate_FrontAngle();
-
-	Calibrate_Forward(15);
-
-	motor.TurnLeft90();
-
-	Calibrate_SideAngle();
-
-	//Obstacle Avoidance End
-	while (travelled > 0)
-	{
-		motor.Forward10();
-		--travelled;
-	}
-}
-
-void Checklist_Obstacle45(int distance)
-{
-	CalibrationTest();
-	int travelled = distance / 10;
-
-	travelled -= 6;
-
-
-	while (ir_FC.getDistance() > 10)
-	{
-		motor.Forward10();
-		--travelled;
-	}
-
-	Calibrate_Forward(16);
-
-	//Diagonal turning left to avoid obstacle
-	//Start
-	motor.TurnLeft45();
-	motor.Forward10();
-	motor.Forward10();
-	motor.Forward10();
-	motor.TurnRight45();
-
-	motor.Forward10();
-	motor.Forward10();
-
-	motor.TurnRight45();
-
-	motor.Forward10();
-	motor.Forward10();
-	motor.Forward10();
-
-	motor.TurnRight45();
-	//end
-
-	//Behind the block now, making sure we're still along our intended line by calibrating and using the obstacle for ref
-	//Start
-	Calibrate_Forward(15);
-
-	motor.TurnRight90();
-
-	Calibrate_Forward(15);
-
-	motor.TurnLeft90();
-	motor.TurnLeft90();
-
-	Calibrate_SideAngle();
-	//End
-
-	while (travelled > 0)
-	{
-		motor.Forward10();
-		--travelled;
-	}
-
-
-
-}
-*/
 
 int NormalizeShortRange(double shortSensor)
 {	
@@ -554,65 +414,101 @@ void loop()
 		canCalibrate = true;
 		char command = commands[currIndex++]; //Get command from String by treating it as an array
 
-		switch (command)
+		if (isDigit(command) && command != '1')
 		{
-			//WASD is for movement
-		case 'w':
-			motor.Forward10();
+			
+			int forwardDist = (int)(command-48); //Convert char to int 
+			if (forwardDist == 0)
+			{
+				forwardDist = 10;
+			}
+
+			motor.Forward(forwardDist * 10);
 			Serial.println("PY");
-			break;
-		case 'W':
-			motor.Forward30();
-			AutoCalibrate_ForwardDistance();
-			Serial.println("PY");
-			break;
-		case 'q':
-			motor.Forward50();
-			Serial.println("PY");
-			break;
-		case 's': //Reverse
-			motor.Turn180();
-			Serial.println("PY");
-			break;
-		case 'a': //Turn left 90
-			motor.TurnLeft90();
-			Serial.println("PY");
-			break;
-		case 'd': //Turn right 90
-			motor.TurnRight90();
-			Serial.println("PY");
-			break;
-			//TFGH is for calibration
-		case 't':
-			Calibrate_Forward();
-			Serial.println("PY");
-			break;
-		case 'f':
-			Calibrate_FrontAngle();
-			Serial.print("PY");
-			break;
-		case 'g':
-			Calibrate_Corner();
-			Serial.println("PY");
-			break;
-		case 'h':
-			Calibrate_Side();
-			Serial.println("PY");
-			break;
-		case 'o':
-			FlushBuffer();
-			Serial.println("PY");
-			break;
-			//IJL are for sensor readings
-		case 'k':
-			GridSensorValues();
-			break;
-		case 'l':
-			RawSensorValues();
-			break;
-		default:
-			Serial.println("Error");
-			break;
+		}
+		else
+		{
+
+			switch (command)
+			{
+				//WASD is for movement
+			case '1':
+			case 'w':
+				motor.Forward10();
+				Serial.println("PY");
+				break;
+			case '!':
+				motor.Forward(110);
+				Serial.println("PY");
+				break;
+			case '@':
+				motor.Forward(120);
+				Serial.println("PY");
+				break;
+			case '#':
+				motor.Forward(130);
+				Serial.println("PY");
+				break;
+			case '$':
+				motor.Forward(140);
+				Serial.println("PY");
+				break;
+			case '%':
+				motor.Forward(150);
+				Serial.println("PY");
+				break;
+			case '^':
+				motor.Forward(160);
+				Serial.println("PY");
+				break;
+			case '&':
+				motor.Forward(170);
+				Serial.println("PY");
+				break;
+			case 's': //Reverse
+				motor.Turn180();
+				Serial.println("PY");
+				break;
+			case 'a': //Turn left 90
+				motor.TurnLeft90();
+				Serial.println("PY");
+				break;
+			case 'd': //Turn right 90
+				motor.TurnRight90();
+				Serial.println("PY");
+				break;
+				//TFGH is for calibration
+			case 't':
+				Calibrate_Forward();
+				Serial.println("PY");
+				break;
+			case 'f':
+				Calibrate_FrontAngle();
+				Serial.print("PY");
+				break;
+			case 'g':
+				Calibrate_Corner();
+				Serial.println("PY");
+				break;
+			case 'h':
+				Calibrate_Side();
+				Serial.println("PY");
+				break;
+			case 'o':
+				FlushBuffer();
+				Serial.println("PY");
+				break;
+				//IJL are for sensor readings
+			case 'k':
+				GridSensorValues();
+				break;
+			case 'l':
+				RawSensorValues();
+				break;
+			default:
+				Serial.println("Error");
+				break;
+			}
 		}
 
 		if (!exploration)
