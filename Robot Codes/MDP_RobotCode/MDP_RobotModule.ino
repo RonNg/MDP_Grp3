@@ -115,10 +115,10 @@ void Calibrate_SideAngle()
 }
 
 //Move forward until one sensor reads setPoint distance
-void Calibrate_Forward(int setPoint = 11.3)
+void Calibrate_Forward(double setPoint = 11.7)
 {
 
-	for (int i = 0; i < 2; ++i)
+	for (int i = 0; i < 1; ++i)
 	{
 		double frontSensor = ir_FC.getDistance();
 
@@ -127,8 +127,9 @@ void Calibrate_Forward(int setPoint = 11.3)
 		//If positive, it means that the robot is too far from the setpoint
 		double distance = frontSensor - setPoint;
 
-		if (abs(distance) <= 0.5)
+		if (abs(distance) <= 0.2)
 			break;
+		
 
 		if (distance > 0) //Robot away from setpoint
 		{
@@ -361,7 +362,7 @@ String commands;
 int currIndex = 0; //Current command index
 int commandLength = 0;
 bool canCalibrate = false;
-bool debugAutoCalibrate = true; //Set to false to disable auto calibration
+bool debugAutoCalibrate = false; //Set to false to disable auto calibration
 bool exploration = true;
 
 void FlushBuffer()
@@ -424,7 +425,7 @@ void loop()
 			}
 
 			motor.Forward(forwardDist * 10);
-			Serial.println("PY");
+			GridSensorValues(); 
 		}
 		else
 		{
@@ -435,47 +436,47 @@ void loop()
 			case '1':
 			case 'w':
 				motor.Forward10();
-				Serial.println("PY");
+				GridSensorValues();
 				break;
 			case '!':
 				motor.Forward(110);
-				Serial.println("PY");
+				GridSensorValues();
 				break;
 			case '@':
 				motor.Forward(120);
-				Serial.println("PY");
+				GridSensorValues();
 				break;
 			case '#':
 				motor.Forward(130);
-				Serial.println("PY");
+				GridSensorValues();
 				break;
 			case '$':
 				motor.Forward(140);
-				Serial.println("PY");
+				GridSensorValues();
 				break;
 			case '%':
 				motor.Forward(150);
-				Serial.println("PY");
+				GridSensorValues();
 				break;
 			case '^':
 				motor.Forward(160);
-				Serial.println("PY");
+				GridSensorValues();
 				break;
 			case '&':
 				motor.Forward(170);
-				Serial.println("PY");
+				GridSensorValues();
 				break;
 			case 's': //Reverse
 				motor.Turn180();
-				Serial.println("PY");
+				GridSensorValues();
 				break;
 			case 'a': //Turn left 90
 				motor.TurnLeft90();
-				Serial.println("PY");
+				GridSensorValues();
 				break;
 			case 'd': //Turn right 90
 				motor.TurnRight90();
-				Serial.println("PY");
+				GridSensorValues();
 				break;
 				//TFGH is for calibration
 			case 't':
@@ -484,7 +485,7 @@ void loop()
 				break;
 			case 'f':
 				Calibrate_FrontAngle();
-				Serial.print("PY");
+				Serial.println("PY");
 				break;
 			case 'g':
 				Calibrate_Corner();
