@@ -115,7 +115,7 @@ void Calibrate_SideAngle()
 }
 
 //Move forward until one sensor reads setPoint distance
-void Calibrate_Forward(double setPoint = 11.7)
+void Calibrate_Forward(double setPoint = 13.0)
 {
 
 	for (int i = 0; i < 1; ++i)
@@ -127,7 +127,7 @@ void Calibrate_Forward(double setPoint = 11.7)
 		//If positive, it means that the robot is too far from the setpoint
 		double distance = frontSensor - setPoint;
 
-		if (abs(distance) <= 0.2)
+		if (abs(distance) <= 0.05)
 			break;
 		
 
@@ -207,11 +207,11 @@ int NormalizeShortRange(double shortSensor)
 	{
 		dist = 2;
 	}
-	else */if (shortSensor <= 15)
+	else */if (shortSensor <= 14.5)
 	{
 		dist = 1;
 	}
-		return dist;
+	return dist;
 }
 
 int NormalizeFrontLeft(double frontLeftSensor)
@@ -222,7 +222,7 @@ int NormalizeFrontLeft(double frontLeftSensor)
 	{
 		dist = 2;
 	}
-	else */if (frontLeftSensor <= 14)
+	else */if (frontLeftSensor <= 11.8)
 	{
 		dist = 1;
 	}
@@ -236,7 +236,7 @@ int NormalizeFrontRight(double rightFrontSensor)
 	{
 		dist = 2;
 	}
-	else */if (rightFrontSensor <= 14)
+	else */if (rightFrontSensor <= 13.5)
 	{
 		dist = 1;
 	}
@@ -251,7 +251,7 @@ int NormalizeFrontSide(double frontSideSensor)
 	{
 		dist = 2;
 	}
-	else*/ if (frontSideSensor <= 15.5)
+	else*/ if (frontSideSensor <= 13.5)
 	{
 		dist = 1;
 	}
@@ -267,7 +267,7 @@ int NormalizeBackSide(double backSideSensor)
 	{
 		dist = 2;
 	}
-	else */if (backSideSensor <= 15.5)
+	else */if (backSideSensor <= 15.0)
 	{
 		dist = 1;
 	}
@@ -279,11 +279,11 @@ int NormalizeLong(double longSensor)
 {
 	int dist = -1;
 
-	if (longSensor > 42 && longSensor <= 51.4)
+	if (longSensor > 43.3 && longSensor <= 52)
 	{
 		dist = 4;
 	}
-	else if (longSensor > 32.0 && longSensor <= 42)
+	else if (longSensor > 32.0 && longSensor <= 43.3)
 	{
 		dist = 3;
 	}
@@ -342,6 +342,12 @@ void setup()
 {
 	Serial.begin(9600);
 
+	//Changes ADC prescaler to 32, faster analogRead
+	ADCSRA &= ~(bit(ADPS0) | bit(ADPS1) | bit(ADPS2)); // clear prescaler bits
+
+	ADCSRA |= bit(ADPS0) | bit(ADPS2);                 //  32 
+	//ADCSRA |= bit(ADPS0) | bit(ADPS1) | bit(ADPS2);   // 128
+
 	enableInterrupt(M1A, m1Change, CHANGE);
 	enableInterrupt(M1B, m1Change, CHANGE);
 
@@ -349,20 +355,13 @@ void setup()
 	enableInterrupt(M2B, m2Change, CHANGE);
 
 	motor.begin();
-
-	/*for (int i = 0; i < 3; ++i)
-	{
-		motor.Forward(10);
-	}*/
-
-	//Calibrate_Forward(12.5);
 }
 
 String commands;
 int currIndex = 0; //Current command index
 int commandLength = 0;
 bool canCalibrate = false;
-bool debugAutoCalibrate = false; //Set to false to disable auto calibration
+bool debugAutoCalibrate = true; //Set to false to disable auto calibration
 bool exploration = true;
 
 void FlushBuffer()
@@ -505,6 +504,16 @@ void loop()
 				break;
 			case 'l':
 				RawSensorValues();
+				break;
+			case '[':
+				Serial.println(analogRead(A0)); //Left sensor read
+				break;
+			case ']':
+				Serial.println(analogRead(A1)); //Left sensor read
+				break;
+			case ';':
+				debugAutoCalibrate = !debugAutoCalibrate;
+				Serial.println(debugAutoCalibrate);
 				break;
 			default:
 				Serial.println("Error");

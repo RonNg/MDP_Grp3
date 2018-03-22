@@ -1,5 +1,7 @@
 #pragma once
 #include <DualVNH5019MotorShield.h>
+#include "SharpIR.h"
+#include <Arduino.h>
 
 #define TICK_REFRESH_INTERVAL 200//ms
 #define TICKS_PER_CM 118
@@ -10,8 +12,6 @@
 
 #define PRATIO_LEFT 3.17383 //1 power = 3.17 RPM for left motor
 #define PRATIO_RIGHT 3.23021 //1 power = 3.23 RPM for right motor
-
-
 
 /*
 	NEED TO RECALIBRATE FORWARD 10, ROTATE LEFT 90 AND ROTATE RIGHT 90 AND TURN 180
@@ -41,7 +41,6 @@ private:
 
 	DualVNH5019MotorShield md;
 
-
 public:
 	inline void M1Change() { m1Ticks++; m1TargetCounter++; }
 	inline void M2Change() { m2Ticks++; m2TargetCounter++; }
@@ -69,8 +68,6 @@ public:
 	
 	void Forward(double cm);
 	void Forward10();
-	void Forward30();
-	void Forward50();
 	void Turn(double angle);
 
 	//Specially calibrated version of moving forward

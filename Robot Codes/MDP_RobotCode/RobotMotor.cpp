@@ -1,5 +1,7 @@
 #include "RobotMotor.h"
 
+//SharpIR brakeSensor(GP2Y0A21YK0F, A2);
+
 
 
 void RobotMotor::begin()
@@ -110,17 +112,23 @@ void RobotMotor::Forward(double cm)
 	ResetPID();
 
 	//Initial speed
-	m1Power = m2Power = 300;
+	m1Power = m2Power = 320;
 
 	md.setBrakes(0, 0);
 	md.setSpeeds(m1Power, m2Power);
 
 
-	while (m1TargetCounter < targetTick - 90 || m2TargetCounter < targetTick - 90)
+	while (m1TargetCounter < targetTick - 80 || m2TargetCounter < targetTick - 80)
 	{
+		//Analog ADC read. 345 is the stop distance in 2^10 bits integer value
+		if (analogRead(A2) >= 355 || analogRead(A0) >= 490 || analogRead(A1) >= 490)
+		{
+			break;
+		}
+
 		CalcRPM();
-		m1Power += ComputePID(0.000540, 0, 0.005, 100, MOTOR_LEFT);
-		m2Power += ComputePID(0.000535, 0, 0.005, 100, MOTOR_RIGHT);
+		m1Power += ComputePID(0.00200, 0, 0.005, 100, MOTOR_LEFT);
+		m2Power += ComputePID(0.00270, 0, 0.005, 100, MOTOR_RIGHT);
 
 		if (m1Power < 0)
 			m1Power = 0;
@@ -152,17 +160,23 @@ void RobotMotor::Forward10()
 	ResetPID();
 
 	//Initial speed
-	m1Power = m2Power = 250;
+	m1Power = m2Power = 350;
 
 	md.setBrakes(0, 0);
 	md.setSpeeds(m1Power, m2Power);
 
 
-	while (m1TargetCounter < targetTick - 70 || m2TargetCounter < targetTick - 70)
+	while (m1TargetCounter < targetTick - 150 || m2TargetCounter < targetTick - 150)
 	{
+		//Analog ADC read. 345 is the stop distance in 2^10 bits integer value
+		if (analogRead(A2) >= 355 || analogRead(A0) >= 490 || analogRead(A1) >= 490)
+		{
+			break;
+		}
+
 		CalcRPM();
-		m1Power += ComputePID(0.000320, 0, 0.005, 100, MOTOR_LEFT);
-		m2Power += ComputePID(0.000600, 0, 0.005, 100, MOTOR_RIGHT);
+		m1Power += ComputePID(0.000100, 0, 0.005, 100, MOTOR_LEFT);
+		m2Power += ComputePID(0.000800, 0, 0.005, 100, MOTOR_RIGHT);
 
 		if (m1Power < 0)
 			m1Power = 0;
@@ -180,9 +194,9 @@ void RobotMotor::Forward10()
 	}
 
 	md.setSpeeds(0, 0);
-	md.setBrakes(400, 400);
+	md.setBrakes(400, 390);
 
-	delay(200);
+	delay(300);
 }
 void RobotMotor::Turn(double angle)
 {
@@ -238,7 +252,7 @@ void RobotMotor::TurnLeft90()
 	md.setSpeeds(m1Power, m2Power);
 	md.setBrakes(0, 0);
 
-	while (m1TargetCounter < targetTick - 65 || m2TargetCounter < targetTick - 65)
+	while (m1TargetCounter < targetTick - 75 || m2TargetCounter < targetTick - 75)
 	{
 		CalcRPM();
 
@@ -273,12 +287,12 @@ void RobotMotor::TurnRight90()
 	md.setSpeeds(m1Power, -m2Power);
 	md.setBrakes(0, 0);
 
-	while (m1TargetCounter < targetTick - 75 || m2TargetCounter < targetTick - 75)
+	while (m1TargetCounter < targetTick - 64 || m2TargetCounter < targetTick - 64)
 	{
 		CalcRPM();
 
 		m1Power += ComputePID(0.000530, 0, 0.005, 90, MOTOR_LEFT);
-		m2Power += ComputePID(0.000530, 0, 0.005, 90, MOTOR_RIGHT);
+		m2Power += ComputePID(0.000535, 0, 0.005, 90, MOTOR_RIGHT);
 
 		md.setSpeeds(m1Power, -m2Power);
 
@@ -288,7 +302,7 @@ void RobotMotor::TurnRight90()
 	md.setSpeeds(0, 0);
 	md.setBrakes(400, 400);
 
-	delay(300);
+	delay(450);
 }
 
 void RobotMotor::Turn180()
@@ -308,11 +322,11 @@ void RobotMotor::Turn180()
 	md.setSpeeds(m1Power, -m2Power);
 	md.setBrakes(0, 0);
 
-	while (m1TargetCounter < targetTick - 45 || m2TargetCounter < targetTick - 45)
+	while (m1TargetCounter < targetTick - 46 || m2TargetCounter < targetTick - 46)
 	{
 		CalcRPM();
 
-		m1Power += ComputePID(0.000550, 0, 0.005, 90, MOTOR_LEFT);
+		m1Power += ComputePID(0.000530, 0, 0.005, 90, MOTOR_LEFT);
 		m2Power += ComputePID(0.000535, 0, 0.005, 90, MOTOR_RIGHT);
 
 		md.setSpeeds(-m1Power, m2Power);
