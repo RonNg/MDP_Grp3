@@ -115,10 +115,10 @@ void Calibrate_SideAngle()
 }
 
 //Move forward until one sensor reads setPoint distance
-void Calibrate_Forward(double setPoint = 13.0)
+void Calibrate_Forward(double setPoint = 12.3)
 {
 
-	for (int i = 0; i < 1; ++i)
+	for (int i = 0; i < 2; ++i)
 	{
 		double frontSensor = ir_FC.getDistance();
 
@@ -127,7 +127,7 @@ void Calibrate_Forward(double setPoint = 13.0)
 		//If positive, it means that the robot is too far from the setpoint
 		double distance = frontSensor - setPoint;
 
-		if (abs(distance) <= 0.05)
+		if (abs(distance) <= 0.1)
 			break;
 		
 
@@ -207,7 +207,7 @@ int NormalizeShortRange(double shortSensor)
 	{
 		dist = 2;
 	}
-	else */if (shortSensor <= 14.5)
+	else */if (shortSensor <= 14.7)
 	{
 		dist = 1;
 	}
@@ -222,7 +222,7 @@ int NormalizeFrontLeft(double frontLeftSensor)
 	{
 		dist = 2;
 	}
-	else */if (frontLeftSensor <= 11.8)
+	else */if (frontLeftSensor <= 11.28)
 	{
 		dist = 1;
 	}
@@ -236,7 +236,7 @@ int NormalizeFrontRight(double rightFrontSensor)
 	{
 		dist = 2;
 	}
-	else */if (rightFrontSensor <= 13.5)
+	else */if (rightFrontSensor <= 11.59)
 	{
 		dist = 1;
 	}
@@ -251,7 +251,7 @@ int NormalizeFrontSide(double frontSideSensor)
 	{
 		dist = 2;
 	}
-	else*/ if (frontSideSensor <= 13.5)
+	else*/ if (frontSideSensor <= 14.3)
 	{
 		dist = 1;
 	}
@@ -267,7 +267,7 @@ int NormalizeBackSide(double backSideSensor)
 	{
 		dist = 2;
 	}
-	else */if (backSideSensor <= 15.0)
+	else */if (backSideSensor <= 13.85)
 	{
 		dist = 1;
 	}
@@ -279,15 +279,15 @@ int NormalizeLong(double longSensor)
 {
 	int dist = -1;
 
-	if (longSensor > 43.3 && longSensor <= 52)
+	if (longSensor > 43.85 && longSensor <= 51.91)
 	{
 		dist = 4;
 	}
-	else if (longSensor > 32.0 && longSensor <= 43.3)
+	else if (longSensor > 32.6 && longSensor <= 43.85)
 	{
 		dist = 3;
 	}
-	else if (longSensor > 23.5 && longSensor <= 32.0)
+	else if (longSensor > 23.5 && longSensor <= 32.6)
 	{
 		dist = 2;
 	}
@@ -345,8 +345,8 @@ void setup()
 	//Changes ADC prescaler to 32, faster analogRead
 	ADCSRA &= ~(bit(ADPS0) | bit(ADPS1) | bit(ADPS2)); // clear prescaler bits
 
-	ADCSRA |= bit(ADPS0) | bit(ADPS2);                 //  32 
-	//ADCSRA |= bit(ADPS0) | bit(ADPS1) | bit(ADPS2);   // 128
+	//ADCSRA |= bit(ADPS0) | bit(ADPS2);                 //  32 
+	ADCSRA |= bit(ADPS0) | bit(ADPS1) | bit(ADPS2);   // 128
 
 	enableInterrupt(M1A, m1Change, CHANGE);
 	enableInterrupt(M1B, m1Change, CHANGE);
@@ -414,21 +414,6 @@ void loop()
 		canCalibrate = true;
 		char command = commands[currIndex++]; //Get command from String by treating it as an array
 
-		if (isDigit(command) && command != '1')
-		{
-			
-			int forwardDist = (int)(command-48); //Convert char to int 
-			if (forwardDist == 0)
-			{
-				forwardDist = 10;
-			}
-
-			motor.Forward(forwardDist * 10);
-			GridSensorValues(); 
-		}
-		else
-		{
-
 			switch (command)
 			{
 				//WASD is for movement
@@ -437,32 +422,12 @@ void loop()
 				motor.Forward10();
 				GridSensorValues();
 				break;
-			case '!':
-				motor.Forward(110);
+			case '5':
+				motor.Forward50();
 				GridSensorValues();
 				break;
-			case '@':
-				motor.Forward(120);
-				GridSensorValues();
-				break;
-			case '#':
-				motor.Forward(130);
-				GridSensorValues();
-				break;
-			case '$':
-				motor.Forward(140);
-				GridSensorValues();
-				break;
-			case '%':
-				motor.Forward(150);
-				GridSensorValues();
-				break;
-			case '^':
-				motor.Forward(160);
-				GridSensorValues();
-				break;
-			case '&':
-				motor.Forward(170);
+			case '7':
+				motor.Forward70();
 				GridSensorValues();
 				break;
 			case 's': //Reverse
@@ -505,6 +470,9 @@ void loop()
 			case 'l':
 				RawSensorValues();
 				break;
+			case 'i':
+				Serial.println(analogRead(A2));
+				break;
 			case '[':
 				Serial.println(analogRead(A0)); //Left sensor read
 				break;
@@ -527,6 +495,5 @@ void loop()
 			AutoCalibrate_ForwardDistance();
 			AutoCalibrate_SideAngle();
 		}
-	}
 }
 

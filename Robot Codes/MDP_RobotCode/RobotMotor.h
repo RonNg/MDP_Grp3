@@ -68,6 +68,9 @@ public:
 	
 	void Forward(double cm);
 	void Forward10();
+	void Forward50();
+	void Forward70();
+
 	void Turn(double angle);
 
 	//Specially calibrated version of moving forward
