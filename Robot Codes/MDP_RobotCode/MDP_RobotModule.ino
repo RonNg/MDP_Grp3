@@ -129,7 +129,7 @@ void Calibrate_Forward(double setPoint = 12.3)
 
 		if (abs(distance) <= 0.1)
 			break;
-		
+
 
 		if (distance > 0) //Robot away from setpoint
 		{
@@ -166,7 +166,7 @@ void Calibrate_Corner()
 void Calibrate_Side()
 {
 	motor.TurnRight90();
-	
+
 	Calibrate_Forward();
 	Calibrate_FrontAngle();
 
@@ -200,9 +200,9 @@ void AutoCalibrate_SideAngle()
 }
 
 int NormalizeShortRange(double shortSensor)
-{	
+{
 	int dist = -1;
-	
+
 	/*if (shortSensor > 15 && shortSensor <= 23.9)
 	{
 		dist = 2;
@@ -217,7 +217,7 @@ int NormalizeShortRange(double shortSensor)
 int NormalizeFrontLeft(double frontLeftSensor)
 {
 	int dist = -1;
-	
+
 	/*if (frontLeftSensor > 14 && frontLeftSensor <= 24)
 	{
 		dist = 2;
@@ -232,7 +232,7 @@ int NormalizeFrontLeft(double frontLeftSensor)
 int NormalizeFrontRight(double rightFrontSensor)
 {
 	int dist = -1;
-	/*if (rightFrontSensor > 14 && rightFrontSensor <= 22.9)	
+	/*if (rightFrontSensor > 14 && rightFrontSensor <= 22.9)
 	{
 		dist = 2;
 	}
@@ -307,14 +307,14 @@ void GridSensorValues()
 	int fr = NormalizeFrontRight(ir_FR.getDistance());
 
 	int lm = NormalizeLong(ir_LM.getDistance());
-	
+
 	int rf = NormalizeFrontSide(ir_SF.getDistance());
 	int rb = NormalizeBackSide(ir_SB.getDistance());
 
 	//int rf = ir_SF.getDistance();
 	//int rb = ir_SB.getDistance();
 
-	Serial.println("P" + String(fl) + "," + String(fc) + "," + String(fr) + "," + String(rf) + "," + String(rb)  + "," + String(lm) );
+	Serial.println("P" + String(fl) + "," + String(fc) + "," + String(fr) + "," + String(rf) + "," + String(rb) + "," + String(lm));
 	//SENSOR|17|15|17|30|20|20
 
 }
@@ -337,7 +337,6 @@ void RawSensorValues()
 	//SENSOR|17|15|17|30|20|20
 }
 
-
 void setup()
 {
 	Serial.begin(9600);
@@ -355,6 +354,7 @@ void setup()
 	enableInterrupt(M2B, m2Change, CHANGE);
 
 	motor.begin();
+
 }
 
 String commands;
@@ -414,20 +414,69 @@ void loop()
 		canCalibrate = true;
 		char command = commands[currIndex++]; //Get command from String by treating it as an array
 
+		if (isDigit(command) && command != '1')
+		{
+
+			int forwardDist = (int)(command - 48); //Convert char to int 
+			if (forwardDist == 0)
+			{
+				forwardDist = 10;
+			}
+
+			if (forwardDist < 4)
+			{
+				motor.ForwardShort(forwardDist * 10);
+			}
+			else
+			{
+				motor.Forward(forwardDist * 10);
+			}
+			GridSensorValues();
+		}
+		else
+		{
 			switch (command)
 			{
 				//WASD is for movement
 			case '1':
 			case 'w':
-				motor.Forward10();
+				motor.ForwardShort(10);
 				GridSensorValues();
 				break;
-			case '5':
-				motor.Forward50();
+			//case '5':
+				//motor.Forward50();
+				//GridSensorValues();
+				//break;
+			case '0':
+				motor.Forward(100);
 				GridSensorValues();
 				break;
-			case '7':
-				motor.Forward70();
+			case '!':
+				motor.Forward(110);
+				GridSensorValues();
+				break;
+			case '@':
+				motor.Forward(120);
+				GridSensorValues();
+				break;
+			case '#':
+				motor.Forward(130);
+				GridSensorValues();
+				break;
+			case '$':
+				motor.Forward(140);
+				GridSensorValues();
+				break;
+			case '%':
+				motor.Forward(150);
+				GridSensorValues();
+				break;
+			case '^':
+				motor.Forward(160);
+				GridSensorValues();
+				break;
+			case '&':
+				motor.Forward(170);
 				GridSensorValues();
 				break;
 			case 's': //Reverse
@@ -488,12 +537,11 @@ void loop()
 				break;
 			}
 		}
-
 		if (!exploration)
 		{
 			AutoCalibrate_ForwardAngle();
 			AutoCalibrate_ForwardDistance();
 			AutoCalibrate_SideAngle();
 		}
+	}
 }
-

@@ -67,6 +67,8 @@ public:
 	void CalibrationForward(double cm, bool reverse);
 	
 	void Forward(double cm);
+	void ForwardShort(double cm);
+
 	void Forward10();
 	void Forward50();
 	void Forward70();
