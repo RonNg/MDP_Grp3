@@ -440,7 +440,7 @@ void loop()
 				//WASD is for movement
 			case '1':
 			case 'w':
-				motor.ForwardShort(10);
+				motor.Forward10();
 				GridSensorValues();
 				break;
 			//case '5':
