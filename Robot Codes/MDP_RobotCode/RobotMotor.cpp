@@ -89,9 +89,9 @@ void RobotMotor::CalibrationForward(double  cm, bool reverse)
 			m2Power = 0;
 
 		if(reverse)
-			md.setSpeeds(-m1Power, -m2Power);
+			md.setSpeeds(-m1Power, -m2Power * 1.025);
 		else
-			md.setSpeeds(m1Power, m2Power);
+			md.setSpeeds(m1Power, m2Power * 1.025);
 
 		delay(1);
 	}
@@ -138,13 +138,13 @@ void RobotMotor::Forward(double cm)
 			m2Power = 0;
 
 
-		md.setSpeeds(m1Power, m2Power);
+		md.setSpeeds(m1Power, m2Power * 1.025);
 
 		delay(1);
 	}
 
 	md.setSpeeds(0, 0);
-	md.setBrakes(300, 300);
+	md.setBrakes(350, 350);
 
 	delay(200);
 }
@@ -184,13 +184,13 @@ void RobotMotor::ForwardShort(double cm)
 			m2Power = 0;
 
 
-		md.setSpeeds(m1Power, m2Power);
+		md.setSpeeds(m1Power, m2Power * 1.025);
 
 		delay(1);
 	}
 
 	md.setSpeeds(0, 0);
-	md.setBrakes(300, 300);
+	md.setBrakes(350, 350);
 
 	delay(200);
 }
@@ -204,15 +204,12 @@ void RobotMotor::Forward10()
 	ResetPID();
 
 	//Initial speed
-	m1Power = m2Power = 300;
+	m1Power = m2Power = 250;
 
 	md.setBrakes(0, 0);
-	//md.setSpeeds(0, m2Power);
-	//delay(20);
-	//md.setSpeeds(m1Power, 0);
 	md.setSpeeds(m1Power, m2Power);
 
-	while (m1TargetCounter < targetTick - 140 || m2TargetCounter < targetTick - 140)
+	while (m1TargetCounter < targetTick - 238 || m2TargetCounter < targetTick - 238)
 	{
 		//Analog ADC read. 345 is the stop distance in 2^10 bits integer value
 		if (analogRead(A2) >= 432 || analogRead(A0) >= 535 || analogRead(A1) >= 535)
@@ -221,8 +218,8 @@ void RobotMotor::Forward10()
 		}
 
 		CalcRPM();
-		m1Power += ComputePID(0.0049, 0, 0.003, 100, MOTOR_LEFT);
-		m2Power += ComputePID(0.00557, 0.00005, 0.003, 100, MOTOR_RIGHT);
+		m1Power += ComputePID(0.00475, 0, 0.003, 100, MOTOR_LEFT);
+		m2Power += ComputePID(0.00557, 0.00000025, 0.003, 100, MOTOR_RIGHT);
 
 		if (m1Power < 0)
 			m1Power = 0;
@@ -230,11 +227,7 @@ void RobotMotor::Forward10()
 		if (m2Power < 0)
 			m2Power = 0;
 
-		md.setSpeeds(m1Power, m2Power);
-
-		/*Serial.print(m1RPM);
-		Serial.print(",");
-		Serial.println(m2RPM);*/
+		md.setSpeeds(m1Power, m2Power*1.043);
 
 		delay(1); //Slows down PID compute 
 	}
@@ -426,7 +419,7 @@ void RobotMotor::TurnRight90()
 	md.setSpeeds(m1Power, -m2Power);
 	md.setBrakes(0, 0);
 
-	while (m1TargetCounter < targetTick - 75 || m2TargetCounter < targetTick - 75)
+	while (m1TargetCounter < targetTick - 90 || m2TargetCounter < targetTick - 90)
 	{
 		CalcRPM();
 
