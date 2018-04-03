@@ -279,7 +279,7 @@ int NormalizeLong(double longSensor)
 {
 	int dist = -1;
 
-	if (longSensor > 43.85 && longSensor <= 51.91)
+	if (longSensor > 43.85 && longSensor <= 49)
 	{
 		dist = 4;
 	}

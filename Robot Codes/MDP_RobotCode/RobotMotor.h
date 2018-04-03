@@ -13,6 +13,11 @@
 #define PRATIO_LEFT 3.17383 //1 power = 3.17 RPM for left motor
 #define PRATIO_RIGHT 3.23021 //1 power = 3.23 RPM for right motor
 
+#define FORWARD_DELAY 250
+#define ROTATE_DELAY 300
+
+
+
 /*
 	NEED TO RECALIBRATE FORWARD 10, ROTATE LEFT 90 AND ROTATE RIGHT 90 AND TURN 180
 */

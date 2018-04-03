@@ -138,7 +138,7 @@ void RobotMotor::Forward(double cm)
 			m2Power = 0;
 
 
-		md.setSpeeds(m1Power, m2Power * 1.025);
+		md.setSpeeds(m1Power, m2Power * 1.023);
 
 		delay(1);
 	}
@@ -146,7 +146,7 @@ void RobotMotor::Forward(double cm)
 	md.setSpeeds(0, 0);
 	md.setBrakes(350, 350);
 
-	delay(200);
+	delay(FORWARD_DELAY);
 }
 void RobotMotor::ForwardShort(double cm)
 {
@@ -184,7 +184,7 @@ void RobotMotor::ForwardShort(double cm)
 			m2Power = 0;
 
 
-		md.setSpeeds(m1Power, m2Power * 1.025);
+		md.setSpeeds(m1Power, m2Power * 1.023);
 
 		delay(1);
 	}
@@ -192,13 +192,14 @@ void RobotMotor::ForwardShort(double cm)
 	md.setSpeeds(0, 0);
 	md.setBrakes(350, 350);
 
-	delay(200);
+	delay(FORWARD_DELAY);
 }
 void RobotMotor::Forward10()
 {
 	int targetTick = 10 * TICKS_PER_CM;
 	m1TargetCounter = m2TargetCounter = 0;
 	m1Ticks = m2Ticks = 0;
+	m1RPM = m2RPM = 0;
 	lastTime = 0;
 
 	ResetPID();
@@ -207,9 +208,11 @@ void RobotMotor::Forward10()
 	m1Power = m2Power = 250;
 
 	md.setBrakes(0, 0);
+
+	
 	md.setSpeeds(m1Power, m2Power);
 
-	while (m1TargetCounter < targetTick - 238 || m2TargetCounter < targetTick - 238)
+	while (m1TargetCounter < targetTick - 225 || m2TargetCounter < targetTick - 225)
 	{
 		//Analog ADC read. 345 is the stop distance in 2^10 bits integer value
 		if (analogRead(A2) >= 432 || analogRead(A0) >= 535 || analogRead(A1) >= 535)
@@ -219,7 +222,7 @@ void RobotMotor::Forward10()
 
 		CalcRPM();
 		m1Power += ComputePID(0.00475, 0, 0.003, 100, MOTOR_LEFT);
-		m2Power += ComputePID(0.00557, 0.00000025, 0.003, 100, MOTOR_RIGHT);
+		m2Power += ComputePID(0.00600, 0.00000025, 0.003, 100, MOTOR_RIGHT);
 
 		if (m1Power < 0)
 			m1Power = 0;
@@ -227,108 +230,17 @@ void RobotMotor::Forward10()
 		if (m2Power < 0)
 			m2Power = 0;
 
-		md.setSpeeds(m1Power, m2Power*1.043);
-
+		md.setSpeeds(m1Power, m2Power * 1.013);
+		
 		delay(1); //Slows down PID compute 
 	}
 	
 	md.setSpeeds(0, 0);
 	md.setBrakes(300, 300);
 
-	delay(500);
+	delay(FORWARD_DELAY);
 }
-void RobotMotor::Forward50()
-{
-	int targetTick = 50 * TICKS_PER_CM;
-	m1TargetCounter = m2TargetCounter = 0;
-	m1Ticks = m2Ticks = 0;
-	lastTime = 0;
 
-	ResetPID();
-
-	//Initial speed
-	m1Power = m2Power = 250;
-
-	md.setBrakes(0, 0);
-	md.setSpeeds(m1Power, m2Power);
-
-
-	while (m1TargetCounter < targetTick - 125 || m2TargetCounter < targetTick - 125)
-	{
-
-		//Analog ADC read. 345 is the stop distance in 2^10 bits integer value
-		if (analogRead(A2) >= 432 || analogRead(A0) >= 535 || analogRead(A1) >= 535)
-		{
-			break;
-		}
-		CalcRPM();
-
-		m1Power += ComputePID(0.0049, 0, 0.005, 100, MOTOR_LEFT);
-		m2Power += ComputePID(0.00545, 0.0000001, 0.005, 100, MOTOR_RIGHT);
-
-		if (m1Power < 0)
-			m1Power = 0;
-
-		if (m2Power < 0)
-			m2Power = 0;
-
-
-		md.setSpeeds(m1Power, m2Power);
-
-		delay(1);
-	}
-
-	md.setSpeeds(0, 0);
-	md.setBrakes(380, 380);
-
-	delay(200);
-}
-void RobotMotor::Forward70()
-{
-	int targetTick = 50 * TICKS_PER_CM;
-	m1TargetCounter = m2TargetCounter = 0;
-	m1Ticks = m2Ticks = 0;
-	lastTime = 0;
-
-	ResetPID();
-
-	//Initial speed
-	m1Power = m2Power = 250;
-
-	md.setBrakes(0, 0);
-	md.setSpeeds(m1Power - 70, m2Power);
-
-
-	while (m1TargetCounter < targetTick - 125 || m2TargetCounter < targetTick - 125)
-	{
-
-		//Analog ADC read. 345 is the stop distance in 2^10 bits integer value
-		if (analogRead(A2) >= 432 || analogRead(A0) >= 535 || analogRead(A1) >= 535)
-		{
-			break;
-		}
-		CalcRPM();
-
-		m1Power += ComputePID(0.005, 0, 0.0009, 100, MOTOR_LEFT);
-		m2Power += ComputePID(0.006, 0, 0.0009, 100, MOTOR_RIGHT);
-
-		if (m1Power < 0)
-			m1Power = 0;
-
-		if (m2Power < 0)
-			m2Power = 0;
-
-
-		md.setSpeeds(m1Power, m2Power);
-
-		delay(1);
-	}
-
-	md.setSpeeds(0, 0);
-	md.setBrakes(380, 380);
-
-	delay(200);
-}
 
 void RobotMotor::Turn(double angle)
 {
@@ -379,11 +291,11 @@ void RobotMotor::TurnLeft90()
 	ResetPID();
 
 
-	m1Power = m2Power = 250;
+	m1Power = m2Power = 200;
 	md.setSpeeds(-m1Power, m2Power);
 	md.setBrakes(0, 0);
 
-	while (m1TargetCounter < targetTick - 75 || m2TargetCounter < targetTick - 75)
+	while (m1TargetCounter < targetTick - 110 || m2TargetCounter < targetTick - 110)
 	{
 		CalcRPM();
 
@@ -397,9 +309,9 @@ void RobotMotor::TurnLeft90()
 	}
 
 	md.setSpeeds(0, 0);
-	md.setBrakes(380, 380);
+	md.setBrakes(350, 350);
 
-	delay(350);
+	delay(ROTATE_DELAY);
 }
 
 
@@ -415,11 +327,11 @@ void RobotMotor::TurnRight90()
 	ResetPID();
 
 
-	m1Power = m2Power = 250;
+	m1Power = m2Power = 200;
 	md.setSpeeds(m1Power, -m2Power);
 	md.setBrakes(0, 0);
 
-	while (m1TargetCounter < targetTick - 90 || m2TargetCounter < targetTick - 90)
+	while (m1TargetCounter < targetTick - 120 || m2TargetCounter < targetTick - 120)
 	{
 		CalcRPM();
 
@@ -435,9 +347,9 @@ void RobotMotor::TurnRight90()
 	}
 
 	md.setSpeeds(0, 0);
-	md.setBrakes(380, 380);
+	md.setBrakes(350, 350);
 
-	delay(350);
+	delay(ROTATE_DELAY);
 }
 
 void RobotMotor::Turn180()
@@ -452,11 +364,11 @@ void RobotMotor::Turn180()
 	ResetPID();
 
 
-	m1Power = m2Power = 250;
+	m1Power = m2Power = 200;
 	md.setSpeeds(m1Power - 150, -m2Power);
 	md.setBrakes(0, 0);
 
-	while (m1TargetCounter < targetTick - 34 || m2TargetCounter < targetTick - 34)
+	while (m1TargetCounter < targetTick - 35 || m2TargetCounter < targetTick - 35)
 	{
 		CalcRPM();
 
@@ -469,7 +381,7 @@ void RobotMotor::Turn180()
 	}
 
 	md.setSpeeds(0, 0);
-	md.setBrakes(380, 380);
+	md.setBrakes(350, 350);
 
-	delay(350);
+	delay(ROTATE_DELAY);
 }
