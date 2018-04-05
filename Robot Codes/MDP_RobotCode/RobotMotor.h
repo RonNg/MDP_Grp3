@@ -10,11 +10,8 @@
 #define MOTOR_LEFT 1
 #define MOTOR_RIGHT 2
 
-#define PRATIO_LEFT 3.17383 //1 power = 3.17 RPM for left motor
-#define PRATIO_RIGHT 3.23021 //1 power = 3.23 RPM for right motor
-
-#define FORWARD_DELAY 250
-#define ROTATE_DELAY 300
+#define FORWARD_DELAY 130
+#define ROTATE_DELAY 130
 
 
 
@@ -75,8 +72,6 @@ public:
 	void ForwardShort(double cm);
 
 	void Forward10();
-	void Forward50();
-	void Forward70();
 
 	void Turn(double angle);
 

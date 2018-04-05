@@ -81,7 +81,7 @@ void Calibrate_SideAngle()
 {
 	double leftSensor;
 	double rightSensor;
-	for (int i = 0; i < 1; ++i)
+	for (int i = 0; i < 2; ++i)
 	{
 		//Align both sensors forward first, regardless whether its far or near
 		leftSensor = ir_SF.getDistance();
@@ -89,7 +89,7 @@ void Calibrate_SideAngle()
 
 		double sensorDiff = abs(leftSensor - rightSensor);
 
-		if (sensorDiff <= 0.01)
+		if (sensorDiff <= 0.05)
 			break;
 
 		//Atan returns radian. Convert rad to deg by multiplying 180/PI
@@ -443,10 +443,6 @@ void loop()
 				motor.Forward10();
 				GridSensorValues();
 				break;
-			//case '5':
-				//motor.Forward50();
-				//GridSensorValues();
-				//break;
 			case '0':
 				motor.Forward(100);
 				GridSensorValues();
