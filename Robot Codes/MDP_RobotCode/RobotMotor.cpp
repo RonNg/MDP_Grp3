@@ -138,7 +138,7 @@ void RobotMotor::Forward(double cm)
 			m2Power = 0;
 
 
-		md.setSpeeds(m1Power, m2Power * 1.021);
+		md.setSpeeds(m1Power, m2Power * 1.003);
 
 		delay(1);
 	}
@@ -184,7 +184,7 @@ void RobotMotor::ForwardShort(double cm)
 			m2Power = 0;
 
 
-		md.setSpeeds(m1Power, m2Power * 1.021);
+		md.setSpeeds(m1Power, m2Power * 1.003);
 
 		delay(1);
 	}
@@ -230,7 +230,7 @@ void RobotMotor::Forward10()
 		if (m2Power < 0)
 			m2Power = 0;
 
-		md.setSpeeds(m1Power, m2Power * 1.005);
+		md.setSpeeds(m1Power, m2Power * 1.032);
 
 		delay(1); //Slows down PID compute 
 	}
@@ -294,7 +294,7 @@ void RobotMotor::TurnLeft90()
 	md.setSpeeds(-m1Power, m2Power);
 	md.setBrakes(0, 0);
 
-	while (m1TargetCounter < targetTick - 110 || m2TargetCounter < targetTick - 110)
+	while (m1TargetCounter < targetTick - 130 || m2TargetCounter < targetTick - 130)
 	{
 		CalcRPM();
 
@@ -330,7 +330,7 @@ void RobotMotor::TurnRight90()
 	md.setSpeeds(m1Power, -m2Power);
 	md.setBrakes(0, 0);
 
-	while (m1TargetCounter < targetTick - 140 || m2TargetCounter < targetTick - 140)
+	while (m1TargetCounter < targetTick - 135 || m2TargetCounter < targetTick - 135)
 	{
 		CalcRPM();
 

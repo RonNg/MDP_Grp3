@@ -81,7 +81,7 @@ void Calibrate_SideAngle()
 {
 	double leftSensor;
 	double rightSensor;
-	for (int i = 0; i < 2; ++i)
+	for (int i = 0; i < 1; ++i)
 	{
 		//Align both sensors forward first, regardless whether its far or near
 		leftSensor = ir_SF.getDistance();
@@ -89,7 +89,7 @@ void Calibrate_SideAngle()
 
 		double sensorDiff = abs(leftSensor - rightSensor);
 
-		if (sensorDiff <= 0.05)
+		if (sensorDiff <= 0.01)
 			break;
 
 		//Atan returns radian. Convert rad to deg by multiplying 180/PI
