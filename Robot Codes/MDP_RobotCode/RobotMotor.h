@@ -10,8 +10,8 @@
 #define MOTOR_LEFT 1
 #define MOTOR_RIGHT 2
 
-#define FORWARD_DELAY 130
-#define ROTATE_DELAY 130
+#define FORWARD_DELAY 200
+#define ROTATE_DELAY 200
 
 
 
