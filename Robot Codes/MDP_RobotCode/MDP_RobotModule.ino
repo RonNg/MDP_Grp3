@@ -207,7 +207,7 @@ int NormalizeShortRange(double shortSensor)
 	{
 		dist = 2;
 	}
-	else */if (shortSensor <= 13.7)
+	else */if (shortSensor <= 14.4)
 	{
 		dist = 1;
 	}
@@ -222,7 +222,7 @@ int NormalizeFrontLeft(double frontLeftSensor)
 	{
 		dist = 2;
 	}
-	else */if (frontLeftSensor <= 11.1)
+	else */if (frontLeftSensor <= 10.5)
 	{
 		dist = 1;
 	}
@@ -236,7 +236,7 @@ int NormalizeFrontRight(double rightFrontSensor)
 	{
 		dist = 2;
 	}
-	else */if (rightFrontSensor <= 11.39)
+	else */if (rightFrontSensor <= 11.28)
 	{
 		dist = 1;
 	}
@@ -251,7 +251,7 @@ int NormalizeFrontSide(double frontSideSensor)
 	{
 		dist = 2;
 	}
-	else*/ if (frontSideSensor <= 14.3)
+	else*/ if (frontSideSensor <= 12.4)
 	{
 		dist = 1;
 	}
@@ -267,7 +267,7 @@ int NormalizeBackSide(double backSideSensor)
 	{
 		dist = 2;
 	}
-	else */if (backSideSensor <= 13.85)
+	else */if (backSideSensor <= 12.9)
 	{
 		dist = 1;
 	}
@@ -279,11 +279,11 @@ int NormalizeLong(double longSensor)
 {
 	int dist = -1;
 
-	if (longSensor > 42.82 && longSensor <= 50.8)
+	/*if (longSensor > 42.82 && longSensor <= 50.8)
 	{
 		dist = 4;
 	}
-	else if (longSensor > 32.6 && longSensor <= 42.82)
+	else*/ if (longSensor > 32.6 && longSensor <= 39.74)
 	{
 		dist = 3;
 	}
